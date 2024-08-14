@@ -1,100 +1,121 @@
 #include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <poll.h>
 #include <cstring>
+#include <arpa/inet.h>
 
-#define PORT 8080
-#define MAX_CLIENTS 10
+const std::vector<std::string> supported_capabilities = 
+		std::vector<std::string>(1, "account-notify");
 
-int main() {
-		int server_fd, new_socket;
-		struct sockaddr_in address;
-		int addrlen = sizeof(address);
-
-		// Crear el socket del servidor
-		server_fd = socket(AF_INET, SOCK_STREAM, 0);
-		if (server_fd == 0) {
-				std::cerr << "Error al crear el socket" << std::endl;
-				return -1;
+void handle_client(int client_fd, const std::string& password) {
+		char buffer[1024];
+		std::string client_message;
+		
+		// Build the list of supported capabilities
+		std::string capabilities;
+		for (std::vector<std::string>::const_iterator it = supported_capabilities.begin(); it != supported_capabilities.end(); ++it) {
+				if (!capabilities.empty()) {
+						capabilities += " ";
+				}
+				capabilities += *it;
 		}
+		
+		std::string cap_ls_response = ":server.capabilities CAP * LS :" + capabilities + "\r\n";
+		send(client_fd, cap_ls_response.c_str(), cap_ls_response.length(), 0);
 
-		// Configurar la dirección y puerto
-		address.sin_family = AF_INET;
-		address.sin_addr.s_addr = INADDR_ANY;
-		address.sin_port = htons(PORT);
-
-		// Enlazar el socket a la dirección y puerto
-		if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-				std::cerr << "Error en bind" << std::endl;
-				close(server_fd);
-				return -1;
-		}
-
-		// Escuchar conexiones entrantes
-		if (listen(server_fd, 3) < 0) {
-				std::cerr << "Error en listen" << std::endl;
-				close(server_fd);
-				return -1;
-		}
-
-		// Array de estructuras pollfd para almacenar los sockets
-		struct pollfd fds[MAX_CLIENTS];
-		fds[0].fd = server_fd;
-		fds[0].events = POLLIN; // Monitorea si hay nuevas conexiones
-
-		// Inicializar el resto de las entradas del array
-		for (int i = 1; i < MAX_CLIENTS; i++) {
-				fds[i].fd = -1; // -1 indica que no se está usando
-		}
-
-		std::cout << "Servidor en escucha en el puerto " << PORT << std::endl;
-
+		// Read messages from the client
 		while (true) {
-				int activity = poll(fds, MAX_CLIENTS, -1); // Espera indefinidamente hasta que haya actividad
+				memset(buffer, 0, sizeof(buffer));
+				ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 
-				if (activity < 0) {
-						std::cerr << "Error en poll" << std::endl;
+				if (bytes_received <= 0) {
+						std::cerr << "Client disconnected or error occurred" << std::endl;
+						close(client_fd);
 						break;
 				}
 
-				// Comprobar si hay nuevas conexiones
-				if (fds[0].revents & POLLIN) {
-						new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-						if (new_socket < 0) {
-								std::cerr << "Error en accept" << std::endl;
-								continue;
-						}
+				client_message = std::string(buffer);
 
-						std::cout << "Nueva conexión, socket fd es " << new_socket << std::endl;
-
-						// Añadir nuevo socket al array de poll
-						for (int i = 1; i < MAX_CLIENTS; i++) {
-								if (fds[i].fd == -1) {
-										fds[i].fd = new_socket;
-										fds[i].events = POLLIN; // Monitorea si hay datos para leer
-										break;
-								}
+				if (client_message.find("CAP LS") != std::string::npos) {
+						// Handle CAP LS command
+						std::string cap_response = ":server.capabilities CAP * LS :" + capabilities + "\r\n";
+						send(client_fd, cap_response.c_str(), cap_response.length(), 0);
+				} else if (client_message.find("CAP REQ") != std::string::npos) {
+						// Handle CAP REQ command
+						std::string cap_req_response = ":server.capabilities CAP * ACK :" + client_message.substr(8) + "\r\n";
+						send(client_fd, cap_req_response.c_str(), cap_req_response.length(), 0);
+				} else if (client_message.find("PASS") != std::string::npos) { //NO FUNCIONA
+						// Handle password command
+						if (client_message.substr(5) == password) {
+								std::string pass_response = ":server 001 :Password accepted\r\n";
+								send(client_fd, pass_response.c_str(), pass_response.length(), 0);
+						} else {
+								std::string pass_fail_response = ":server 464 :Password incorrect\r\n";
+								send(client_fd, pass_fail_response.c_str(), pass_fail_response.length(), 0);
+								close(client_fd);
+								break;
 						}
+				} else {
+					std::cout << client_message << std::endl;
+						std::string msg_response = ":server 001 : Unknown holas\r\n";
+						send(client_fd, msg_response.c_str(), msg_response.length(), 0);
+				}
+		}
+}
+
+int main(int argc, char *argv[]) {
+		if (argc != 3) {
+				std::cerr << "Usage: " << argv[0] << " <port> <password>" << std::endl;
+				return 1;
+		}
+
+		int port;
+		std::stringstream(argv[1]) >> port;
+		std::string password = argv[2];
+
+		int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+		if (server_fd < 0) {
+				std::cerr << "Failed to create socket" << std::endl;
+				return 1;
+		}
+
+		sockaddr_in server_addr;
+		memset(&server_addr, 0, sizeof(server_addr));
+		server_addr.sin_family = AF_INET;
+		server_addr.sin_addr.s_addr = INADDR_ANY;
+		server_addr.sin_port = htons(port);
+
+		if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+				std::cerr << "Bind failed" << std::endl;
+				close(server_fd);
+				return 1;
+		}
+
+		if (listen(server_fd, 3) < 0) {
+				std::cerr << "Listen failed" << std::endl;
+				close(server_fd);
+				return 1;
+		}
+
+		std::cout << "Server listening on port " << port << std::endl;
+
+		while (true) {
+				sockaddr_in client_addr;
+				socklen_t client_addr_len = sizeof(client_addr);
+				int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+
+				if (client_fd < 0) {
+						std::cerr << "Accept failed" << std::endl;
+						continue;
 				}
 
-				// Revisar los sockets de clientes para ver si tienen datos para leer
-				for (int i = 1; i < MAX_CLIENTS; i++) {
-						if (fds[i].fd != -1 && fds[i].revents & POLLIN) {
-								char buffer[1024] = {0};
-								int valread = read(fds[i].fd, buffer, 1024);
-								if (valread == 0) {
-										// Cliente ha cerrado la conexión
-										std::cout << "Cliente desconectado, socket fd " << fds[i].fd << std::endl;
-										close(fds[i].fd);
-										fds[i].fd = -1; // Marcar como no usado
-								} else {
-										std::cout << "Mensaje recibido: " << buffer << std::endl;
-										// Responder al cliente
-										send(fds[i].fd, "Mensaje recibido\n", 17, 0);
-								}
-						}
-				}
+				std::cout << "Client connected" << std::endl;
+
+				handle_client(client_fd, password);
 		}
 
 		close(server_fd);
