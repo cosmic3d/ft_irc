@@ -68,12 +68,26 @@ void handle_client(int client_fd, const std::string& password) {
                 close(client_fd);
                 break;
             }
-        } else if (client_message.find("WHOIS") == 0) {
+        } else if (client_message.find("WHOIS") != std::string::npos) {
             // Handle WHOIS command
             std::string whois_response = ":server 311 " + client_message.substr(6) + " :User information\r\n";
 						std::cout << "Sending: " << whois_response << std::endl;
             send(client_fd, whois_response.c_str(), whois_response.length(), 0);
-        } else if (!password_accepted) {
+        } else if (client_message.find("QUIT") != std::string::npos) {
+						// Handle QUIT command
+						std::string quit_response = ":server 221 :Goodbye\r\n";
+						std::cout << "Sending: " << quit_response << std::endl;
+						send(client_fd, quit_response.c_str(), quit_response.length(), 0);
+						close(client_fd);
+						break;
+				}
+				else if (client_message.find("PING") != std::string::npos) {
+						// Handle PING command
+						std::string ping_response = ":server 200 :PONG\r\n";
+						std::cout << "Sending: " << ping_response << std::endl;
+						send(client_fd, ping_response.c_str(), ping_response.length(), 0);
+				}
+				else if (!password_accepted) {
             std::string error_response = ":server 464 : Password required. Use /quote PASS <password> to aunthenticate\r\n";
 						std::cout << "Sending: " << error_response << std::endl;
             send(client_fd, error_response.c_str(), error_response.length(), 0);
