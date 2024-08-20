@@ -1,19 +1,9 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <cstring>
-#include <arpa/inet.h>
 #include "../hdrs/Request.hpp"
-#include "parsing.cpp"
 
 const std::vector<std::string> supported_capabilities = 
     std::vector<std::string>(1, "account-notify");
 
-void handle_client(int client_fd, const std::string& password) {
+void handle_client(int client_fd) {
     
     // Build the list of supported capabilities. EN EL FUTURO GUARDAR ESTA LISTA EN UNA VARIABLE EN EL SERVER
     std::string capabilities;
@@ -23,9 +13,7 @@ void handle_client(int client_fd, const std::string& password) {
         }
         capabilities += *it;
     }
-    
-    std::string cap_ls_response = ":server.capabilities CAP * LS :" + capabilities + "\r\n";
-    send(client_fd, cap_ls_response.c_str(), cap_ls_response.length(), 0);
+
     // En algún punto de la función de manejo de cliente:
     char buffer[512];
     ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
@@ -34,7 +22,7 @@ void handle_client(int client_fd, const std::string& password) {
         buffer[bytes_received] = '\0'; // Asegurarse de que la cadena esté terminada
         Request req = parse_request(buffer);
         req.print(); // Para depuración, imprimir la solicitud recibida
-        execute_command(req);
+        execute_command(req, client_fd);
     } else {
         // Manejo de error o desconexión
     }
@@ -48,7 +36,7 @@ int main(int argc, char *argv[]) {
 
     int port;
     std::stringstream(argv[1]) >> port;
-    std::string password = argv[2];
+    // std::string password = argv[2]; LA GUARDAREMOS EN EL SERVER EN VEZ DE AQUÍ
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
@@ -88,7 +76,7 @@ int main(int argc, char *argv[]) {
 
         std::cout << "Client connected" << std::endl;
 
-        handle_client(client_fd, password);
+        handle_client(client_fd);
     }
 
     close(server_fd);

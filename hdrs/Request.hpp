@@ -2,7 +2,14 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <cstring>
+#include <arpa/inet.h>
 
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
 class Request {
 public:
     std::string prefix;        // El origen del mensaje, si existe
@@ -15,14 +22,11 @@ public:
     // Constructor con inicialización
     Request(const std::string& pref, const std::string& cmd, const std::vector<std::string>& prms);
     
-    // Método para imprimir la solicitud (útil para depuración)
-    void print() const {
-        std::cout << "Prefix: " << prefix << std::endl;
-        std::cout << "Command: " << command << std::endl;
-        std::cout << "Params: ";
-        for (size_t i = 0; i < params.size(); ++i) {
-            std::cout << params[i] << (i < params.size() - 1 ? ", " : "");
-        }
-        std::cout << std::endl;
-    }
+    // Método para imprimir la solicitud (útil para depuración) ELIMINAR LUEGO PORQUE NO ESTÁ PERMITIDO DEFINIR FUNCIONES EN CLASES
+    void print() const;
 };
+Request parse_request(const std::string& buffer);
+void execute_command(const Request& req, int client_fd);
+std::string format_message(const std::string& prefix, const std::string& command, const std::vector<std::string>& params);
+
+#endif
