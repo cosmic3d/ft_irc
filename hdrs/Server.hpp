@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 08:49:54 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/21 12:46:46 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,9 @@
 #include <arpa/inet.h>
 #include <poll.h>
 #include <cstring>
+#include <string>
+#include <vector>
+
 #include "Client.hpp"
 
 #define PORT 8080

@@ -6,16 +6,14 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:52:45 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 08:53:48 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/21 12:49:26 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#include <string>
-#include <vector>
-#include "Client.hpp"
+#include "Server.hpp"
 
 class Channel {
 private:
