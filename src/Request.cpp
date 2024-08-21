@@ -1,6 +1,5 @@
 // Request.cpp
 #include "Request.hpp"
-#include <iostream>
 
 // Constructor por defecto
 Request::Request() {}

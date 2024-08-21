@@ -9,11 +9,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int port = std::stoi(argv[1]);
+    //port to num
+    int port;
+    std::stringstream(argv[1]) >> port;
     std::string password = argv[2];
 
     try {
-        Server ircServer(port, password);
+        Server ircServer("servi", port, password);
         ircServer.start();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

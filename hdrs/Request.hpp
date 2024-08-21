@@ -26,7 +26,6 @@ public:
     void print() const;
 };
 Request parse_request(const std::string& buffer);
-void execute_command(const Request& req, int client_fd);
-std::string format_message(const std::string& prefix, const std::string& command, const std::vector<std::string>& params);
+
 
 #endif

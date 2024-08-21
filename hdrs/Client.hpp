@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:31:10 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 08:50:58 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/21 17:35:19 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,11 @@ public:
     
     int getSocket() const;
     void setNickname(const std::string &nickname);
+    void setUsername(const std::string &username);
     std::string getNickname() const;
+    std::string getUsername() const;
     bool    isAuthenticated() const;
-    void    setAuthenticated();
+    void    setAuthenticated(bool status);
 };
 
 #endif

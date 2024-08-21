@@ -3,19 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 08:52:23 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/21 17:50:35 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(int port, const std::string &password) {
+Server::Server(const std::string &name, int port, const std::string &password) {
     this->_port = port;
     this->_password = password;
     this->_serverSocket = -1;
+    this->_name = name;
+    this->_capabilitites = std::vector<std::string>();
+    this->_capabilitites.push_back("invite-notify");
     std::cout << "Server constructor called" << std::endl;
 }
 
@@ -72,7 +75,7 @@ void    Server::init() {
  * sockets have activity and respond accordingly.
 */
 void    Server::run() {
-    while (true) {
+    while (42) {
         // Poll the set of file descriptors to see which ones are ready
         // data() returns a pointer to the first element of _pollFds, which is how poll() expects to receive the list of pollfd structures.
         int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
@@ -118,8 +121,13 @@ void    Server::handleClient(int clientSocket) {
        if (bytesRead <= 0) {
         // If the client disconnected or an error occurred, close the connection
         close(clientSocket);
-        _pollFds.erase(std::remove_if(_pollFds.begin(), _pollFds.end(), 
-                    [clientSocket](pollfd pfd){ return pfd.fd == clientSocket; }), _pollFds.end());
+        //remove client socket from poll list
+        for (size_t i = 0; i < _pollFds.size(); ++i) {
+            if (_pollFds[i].fd == clientSocket) {
+                _pollFds.erase(_pollFds.begin() + i);
+                break;
+            }
+        }
         delete _clients[clientSocket];
         _clients.erase(clientSocket);
         return;
@@ -127,31 +135,22 @@ void    Server::handleClient(int clientSocket) {
 
     buffer[bytesRead] = '\0';
     std::string message(buffer);
-
-    // Check if client is authenticated before parsing command
-    if (!_clients[clientSocket]->isAuthenticated()) {
-        handleAuthentication(clientSocket, message);  // Handle authentication first
-        return;
+    //split buffer using CR-LF as delimiter. without split function
+    std::vector<std::string> messages;
+    std::string delimiter = "\r\n";
+    size_t pos = 0;
+    std::string token;
+    while ((pos = message.find(delimiter)) != std::string::npos) {
+        token = message.substr(0, pos);
+        messages.push_back(token);
+        message.erase(0, pos + delimiter.length());
     }
+    messages.push_back(message);
 
-    // Parse and process the recieved command
-    parseCommand(clientSocket, message);
-}
-
-void    Server::handleAuthentication(int clientSocket, const std::string &message) {
-    if (message == _password) {
-        _clients[clientSocket]->setAuthenticated(true);
-        std::cout << "clientSocket: " << clientSocket << " has been authenticated" << std::endl;
-    } else {
-        // Send an error message and close the connection if the password is incorrect
-        close(clientSocket);
-        _pollFds.erase(std::remove_if(_pollFds.begin(), _pollFds.end(), 
-                    [clientSocket](pollfd pfd){ return pfd.fd == clientSocket; }), _pollFds.end());
-        delete _clients[clientSocket];
-        _clients.erase(clientSocket);
+    //parse, execute and send response for each message
+    for (size_t i = 0; i < messages.size(); i++) {
+        Request req = parse_request(messages[i]);
+        std::string response = execute_command(req, clientSocket);
+        send(clientSocket, response.c_str(), response.length(), 0);
     }
 }
-
-// void    Server::parseCommand(int clientSocket, const std::string &message) {
-    
-// }

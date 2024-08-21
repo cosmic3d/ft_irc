@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 08:51:07 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/21 17:43:34 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,14 +24,22 @@ void Client::setNickname(const std::string &nickname) {
     _nickname = nickname;
 }
 
+void Client::setUsername(const std::string &username) {
+    _username = username;
+}
+
 std::string Client::getNickname() const {
     return _nickname;
 }
 
-bool    isAuthenticated() const {
+std::string Client::getUsername() const {
+    return _username;
+}
+
+bool Client::isAuthenticated() const {
     return _authenticated;
 }
 
-void setAuthenticated(bool status) {
+void Client::setAuthenticated(bool status) {
     _authenticated = status;
 }
