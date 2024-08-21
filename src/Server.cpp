@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 12:49:51 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/21 14:17:50 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ void    Server::handleConnection() {
     _pollFds.push_back(clientPollfd);
 
     // Add new client to client class list (adds to clSo index for constant time access)
-    // _clients[clientSocket] = new Client(clientSocket);
+    _clients[clientSocket] = new Client(clientSocket);
 }
 
 void    Server::handleClient(int clientSocket) {
