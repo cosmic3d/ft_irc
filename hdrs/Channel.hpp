@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:52:45 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 12:49:26 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/21 15:02:16 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,13 @@
 
 class Channel {
 private:
-    std::string _name;
-    std::string _topic;
-    std::vector<Client*> _clients;
-    Client *_operator;
+    std::string             _name;
+    std::string             _topic;
+    std::vector<Client*>    _clients;
+    Client *                _moderator;
 
 public:
-    Channel(const std::string &name, Client *op);
+    Channel(const std::string &name, Client *mod);
     ~Channel();
 
     void addClient(Client *client);
