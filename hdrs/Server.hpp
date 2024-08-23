@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 17:42:45 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/23 21:51:45 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@
 #include <arpa/inet.h>
 #include <poll.h>
 #include <cstring>
-#include "Client.hpp"
 
 #define PORT 8080
 #define MAX_CLIENTS 10
@@ -67,5 +66,6 @@ class Server {
 #include "Request.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
+#include "utils.hpp"
 
 #endif

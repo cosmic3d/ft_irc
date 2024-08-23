@@ -1,15 +1,22 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <cstring>
-#include <arpa/inet.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Request.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/23 21:23:05 by jenavarr          #+#    #+#             */
+/*   Updated: 2024/08/23 21:23:05 by jenavarr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
+
+#include "Server.hpp"
+#include "colors.hpp"
+
 class Request {
 public:
     std::string prefix;        // El origen del mensaje, si existe

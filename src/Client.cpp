@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 17:43:34 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/23 20:59:44 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,12 @@
 
 Client::Client(int socket) : _socket(socket), _authenticated(false) {
     std::cout << "_client[" << socket << "] created" << std::endl;
+}
+
+//destructor
+Client::~Client() {
+    // this->_socket = -1;
+    std::cout << "_client[" << _socket << "] destroyed" << std::endl;
 }
 
 int Client::getSocket() const {

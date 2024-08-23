@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "utils.hpp"
 
 Request parse_request(const std::string& buffer) {
     std::string prefix;
@@ -18,7 +19,8 @@ Request parse_request(const std::string& buffer) {
     std::vector<std::string> params;
 
     if (buffer.empty()) {
-        std::cerr << "Empty buffer" << std::endl;
+        print_debug("Empty buffer", colors::red, colors::on_bright_white);
+        return Request();
     }
 
     std::istringstream stream(buffer);
@@ -30,13 +32,14 @@ Request parse_request(const std::string& buffer) {
         if (prefix.length() > 1) {
             prefix = prefix.substr(1);  // Remove the leading ':'
         } else {
-            std::cerr << "Invalid prefix found in the buffer" << std::endl;
+            print_debug("Empty prefix", colors::on_yellow, colors::bold);
         }
     }
 
     // Get the command
     if (!std::getline(stream, command, ' ') || command.empty()) {
-        std::cerr << "No command found in the buffer" << std::endl;
+        print_debug("Empty command", colors::on_yellow, colors::bold);
+        return Request();
     }
 
     // Get the parameters
@@ -80,7 +83,7 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     if (_clients[client_fd]->isAuthenticated() == false) {
         //pass a vector list of parameters to the format_message function {"You have not registered"} DOES NOT WORK
         std::vector<std::string> params;
-        params.push_back("You have not registered");
+        params.push_back(" You have not registered. Please use the PASS command to authenticate.");
         return format_message(_name, "451", params);
     }
     
@@ -111,7 +114,12 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     } else {
         std::cout << "Unknown command: " << req.command << std::endl;
         // Responder con un error al cliente
+        std::vector<std::string> params;
+        params.push_back(req.command);
+        params.push_back("Unknown command");
+        return format_message(_name, "421", params);
     }
+    return "";
 }
 //Format message to send to the client in the RFC 2812 format
 std::string Server::format_message(const std::string& prefix, const std::string& command, const std::vector<std::string>& params) {

@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 17:50:35 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/23 22:48:09 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ Server::Server(const std::string &name, int port, const std::string &password) {
     this->_name = name;
     this->_capabilitites = std::vector<std::string>();
     this->_capabilitites.push_back("invite-notify");
-    std::cout << "Server constructor called" << std::endl;
+    print_debug("Server created", colors::green, colors::italic);
+    print_debug("Server name: " + this->_name, colors::green, colors::reset);
 }
 
 Server::~Server() {
@@ -109,7 +110,7 @@ void    Server::handleConnection() {
     _pollFds.push_back(clientPollfd);
 
     // Add new client to client class list (adds to clSo index for constant time access)
-    // _clients[clientSocket] = new Client(clientSocket);
+    _clients[clientSocket] = new Client(clientSocket);
 }
 
 void    Server::handleClient(int clientSocket) {
@@ -119,6 +120,7 @@ void    Server::handleClient(int clientSocket) {
     // Recieve data from client
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
        if (bytesRead <= 0) {
+        print_debug("Client disconnected", colors::red, colors::bold);
         // If the client disconnected or an error occurred, close the connection
         close(clientSocket);
         //remove client socket from poll list
@@ -135,6 +137,8 @@ void    Server::handleClient(int clientSocket) {
 
     buffer[bytesRead] = '\0';
     std::string message(buffer);
+    print_debug("[" + itos(clientSocket) + "]", colors::cyan, colors::bold);
+    print_debug("CLIENT: " + message, colors::grey, colors::on_bright_cyan);
     //split buffer using CR-LF as delimiter. without split function
     std::vector<std::string> messages;
     std::string delimiter = "\r\n";
@@ -150,7 +154,9 @@ void    Server::handleClient(int clientSocket) {
     //parse, execute and send response for each message
     for (size_t i = 0; i < messages.size(); i++) {
         Request req = parse_request(messages[i]);
+        // req.print();
         std::string response = execute_command(req, clientSocket);
+        print_debug("SERVER: " + response, colors::cyan, colors::on_bright_grey);
         send(clientSocket, response.c_str(), response.length(), 0);
     }
 }
