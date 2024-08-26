@@ -22,6 +22,7 @@ public:
     std::string prefix;        // El origen del mensaje, si existe
     std::string command;       // El comando o código numérico de 3 dígitos
     std::vector<std::string> params; // Los parámetros del comando
+    bool valid;                // Indica si la solicitud es válida o no
 
     // Constructor por defecto
     Request();

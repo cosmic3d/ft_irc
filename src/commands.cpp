@@ -1,64 +1,31 @@
 #include "Server.hpp"
 #include <vector>
 
-std::string Server::handleCapabilites(const Request& req, int /*client_fd*/) {
-    // Manejamos cada subcomando CAP aquí y devolvemos la respuesta apropiada (capabilities)
-
-    if (req.params.size() < 1) {
-        std::vector<std::string> params;
-        params.push_back("CAP");
-        params.push_back("Not enough parameters");
-        return format_message(_name, "410", params);
-    }
-    if (req.params[0] == "LS") {
-        std::vector<std::string> params;
-        params.push_back("CAP");
-        params.push_back("LS");
-        return format_message(_name, "001", params);
-    }
-    if (req.params[0] == "REQ") {
-        std::vector<std::string> params;
-        params.push_back("CAP");
-        params.push_back("REQ");
-        return format_message(_name, "001", params);
-    }
-    if (req.params[0] == "END") {
-        std::vector<std::string> params;
-        params.push_back("CAP");
-        params.push_back("END");
-        return format_message(_name, "001", params);
-    }
-    std::vector<std::string> params;
-    params.push_back("CAP");
-    params.push_back("Invalid subcommand");
-    return format_message(_name, "410", params);
-}
-
 std::string Server::handlePass(const Request& req, int client_fd) {
     if (req.params.size() < 1) {
         std::vector<std::string> params;
         params.push_back("PASS");
         params.push_back("Not enough parameters");
-        return format_message(_name, "461", params);
+        return format_message(_name, ERR_NEEDMOREPARAMS, params);
     }
     if (_clients[client_fd]->isAuthenticated()) {
         std::vector<std::string> params;
         params.push_back("PASS");
         params.push_back("Already registered");
-        return format_message(_name, "462", params);
+        return format_message(_name, ERR_ALREADYREGISTRED, params);
     }
     if (req.params[0] != _password) {
         std::vector<std::string> params;
         params.push_back("PASS");
         params.push_back("Password incorrect");
-        return format_message(_name, "464", params);
+        return format_message(_name, ERR_PASSWDMISMATCH, params);
     }
     _clients[client_fd]->setAuthenticated(true);
-    std::cout << "clientSocket: " << client_fd << " has been authenticated" << std::endl;
+    print_debug("Client authenticated: " + itos(client_fd), colors::green, colors::bold);
     std::vector<std::string> params;
     params.push_back("PASS");
     params.push_back("Welcome to the IRC server!");
-    return format_message(_name, "001", params);
+    return format_message(_name, RPL_WELCOME, params);
 }
 
 std::string Server::handleNick(const Request& req, int client_fd) {

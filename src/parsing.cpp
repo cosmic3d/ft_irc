@@ -33,6 +33,7 @@ Request parse_request(const std::string& buffer) {
             prefix = prefix.substr(1);  // Remove the leading ':'
         } else {
             print_debug("Empty prefix", colors::on_yellow, colors::bold);
+            return Request();
         }
     }
 
@@ -61,15 +62,23 @@ Request parse_request(const std::string& buffer) {
 
 //Esto no va aquí pero me la suda
 std::string Server::execute_command(const Request& req, int client_fd) {
-    if (req.command == "PASS") {
+    if (!req.valid) {
+        return "";
+    } else if (req.command == "PASS") {
         // Manejar la autenticación con contraseña
         std::cout << "Handling PASS" << std::endl;
         return handlePass(req, client_fd);
-    } else if (req.command == "CAP") {
-        // Manejar el comando CAP
-        std::cout << "Handling CAP" << std::endl;
-        return handleCapabilites(req, client_fd);
-    } else if (req.command == "NICK") {
+    } 
+        // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
+    if (_clients[client_fd]->isAuthenticated() == false) {
+        //pass a vector list of parameters to the format_message function {"You have not registered"} DOES NOT WORK
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("You have not registered. Please use the PASS command to authenticate.");
+        return format_message(_name, ERR_PASSWDMISMATCH, params);
+    }
+
+    if (req.command == "NICK") {
         // Manejar el comando NICK
         std::cout << "Handling NICK" << std::endl;
         return handleNick(req, client_fd);
@@ -77,47 +86,42 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         // Manejar el comando USER
         std::cout << "Handling USER" << std::endl;
         return handleUser(req, client_fd);
-    }
-    
-        // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
-    if (_clients[client_fd]->isAuthenticated() == false) {
-        //pass a vector list of parameters to the format_message function {"You have not registered"} DOES NOT WORK
-        std::vector<std::string> params;
-        params.push_back(" You have not registered. Please use the PASS command to authenticate.");
-        return format_message(_name, "451", params);
-    }
-    
-    if (req.command == "PING") {
+    } else if (req.command == "PING") {
         // Ejemplo de cómo manejar un comando PING
         std::cout << "Responding to PING" << std::endl;
+        return ""; // TO_DO
         // Aquí se respondería con PONG al cliente
     } else if (req.command == "JOIN") {
         // Manejar el comando JOIN
         std::cout << "Handling JOIN" << std::endl;
+        return ""; // TO_DO
         // TO-DO: Implementar el manejo del comando JOIN
     } else if (req.command == "PART") {
         // Manejar el comando PART
         std::cout << "Handling PART" << std::endl;
+        return ""; // TO_DO
         // TO-DO: Implementar el manejo del comando PART
     } else if (req.command == "PRIVMSG") {
         // Manejar el comando PRIVMSG
         std::cout << "Handling PRIVMSG" << std::endl;
+        return ""; // TO_DO
         // TO-DO: Implementar el manejo del comando PRIVMSG
     } else if (req.command == "QUIT") {
         // Manejar el comando QUIT
         std::cout << "Handling QUIT" << std::endl;
+        return ""; // TO_DO
         // TO-DO: Implementar el manejo del comando QUIT
     } else if (req.command == "WHOIS") {
         // Manejar el comando WHOIS
         std::cout << "Handling WHOIS" << std::endl;
+        return ""; // TO_DO
         // Responder con la información del usuario solicitado
     } else {
-        std::cout << "Unknown command: " << req.command << std::endl;
         // Responder con un error al cliente
         std::vector<std::string> params;
-        params.push_back(req.command);
-        params.push_back("Unknown command");
-        return format_message(_name, "421", params);
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("Unknown command " + req.command);
+        return format_message(_name, ERR_UNKNOWNCOMMAND, params);
     }
     return "";
 }
@@ -126,7 +130,7 @@ std::string Server::format_message(const std::string& prefix, const std::string&
     std::string message = prefix.empty() ? "" : ":" + prefix + " ";
     message += command;
     for (size_t i = 0; i < params.size(); ++i) {
-        message += " " + params[i];
+        message += (i == params.size() - 1 ? " :" : " ") + params[i];
     }
     message += "\r\n";
     return message;

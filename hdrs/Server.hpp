@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/23 21:51:45 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/26 22:15:37 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <poll.h>
 #include <cstring>
 
+#define SERVER_NAME "servi"
 #define PORT 8080
 #define MAX_CLIENTS 10
 
@@ -54,7 +55,6 @@ class Server {
         void    parseCommand(int clientSocket, const std::string &message);// TO-DO
         std::string execute_command(const Request& req, int client_fd);
         std::string handlePass(const Request& req, int client_fd);
-        std::string handleCapabilites(const Request& req, int client_fd);
         std::string handleNick(const Request& req, int client_fd);
         std::string handleUser(const Request& req, int client_fd);
         std::string format_message(const std::string& prefix, const std::string& command, const std::vector<std::string>& params);
@@ -67,5 +67,6 @@ class Server {
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "utils.hpp"
+#include "responses.hpp"
 
 #endif

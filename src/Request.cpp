@@ -1,12 +1,12 @@
 // Request.cpp
 #include "Request.hpp"
 
-// Constructor por defecto
-Request::Request() {}
+// Constructor por defecto (inicializa los punteros a NULL y la bandera a false)
+Request::Request(): valid(false) {}
 
 // Constructor con inicialización de prefijo, comando y parámetros
 Request::Request(const std::string& pref, const std::string& cmd, const std::vector<std::string>& prms)
-    : prefix(pref), command(cmd), params(prms) {}
+    : prefix(pref), command(cmd), params(prms), valid(true) {}
 
 // Método para imprimir la solicitud
 void Request::print() const {

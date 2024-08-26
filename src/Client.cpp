@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/23 20:59:44 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/26 22:37:06 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void Client::setUsername(const std::string &username) {
 }
 
 std::string Client::getNickname() const {
-    return _nickname;
+    return _nickname == "" ? "*" : _nickname; // return "*" if nickname is empty
 }
 
 std::string Client::getUsername() const {

@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     std::string password = argv[2];
 
     try {
-        Server ircServer("servi", port, password);
+        Server ircServer(SERVER_NAME, port, password);
         ircServer.start();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/23 22:48:09 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/26 20:26:54 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,7 @@ void    Server::handleConnection() {
     _pollFds.push_back(clientPollfd);
 
     // Add new client to client class list (adds to clSo index for constant time access)
+    print_debug("New client connected: " + itos(clientSocket), colors::green, colors::bold);
     _clients[clientSocket] = new Client(clientSocket);
 }
 
