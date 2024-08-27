@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/27 15:56:53 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:01:34 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,8 @@ void    Server::_handleClient(int clientSocket) {
             continue;
         }
         print_debug("SERVER: " + response, colors::cyan, colors::on_bright_grey);
-        send(clientSocket, response.c_str(), response.length(), 0);
+        if (send(clientSocket, response.c_str(), response.length(), 0) < 0) {
+            print_debug("Failed to send response: " + response, colors::red, colors::bold);
+        }
     }
 }
