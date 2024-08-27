@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/26 22:15:37 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:15:39 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 #include <poll.h>
 #include <cstring>
 
-#define SERVER_NAME "servi"
+#define SERVER_NAME "LittleBigServer"
 #define PORT 8080
 #define MAX_CLIENTS 10
 

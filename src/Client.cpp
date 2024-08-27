@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/26 22:37:06 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:16:19 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void Client::setUsername(const std::string &username) {
 }
 
 std::string Client::getNickname() const {
-    return _nickname == "" ? "*" : _nickname; // return "*" if nickname is empty
+    return _nickname.empty() ? "*" : _nickname; // return "*" if nickname is empty, else return nickname
 }
 
 std::string Client::getUsername() const {
@@ -48,4 +48,17 @@ bool Client::isAuthenticated() const {
 
 void Client::setAuthenticated(bool status) {
     _authenticated = status;
+}
+
+bool Client::isRegistered() const {
+    return _registered;
+}
+
+void Client::setRegistered(bool status) {
+    _registered = status;
+}
+
+bool Client::checkRegistered() {
+    this->setRegistered(!this->getNickname().empty() && !this->getUsername().empty() && this->isAuthenticated());
+    return this->isRegistered();
 }

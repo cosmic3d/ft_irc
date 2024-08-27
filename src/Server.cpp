@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/26 20:26:54 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:08:46 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,6 +157,9 @@ void    Server::handleClient(int clientSocket) {
         Request req = parse_request(messages[i]);
         // req.print();
         std::string response = execute_command(req, clientSocket);
+        if (response.empty()) {
+            continue;
+        }
         print_debug("SERVER: " + response, colors::cyan, colors::on_bright_grey);
         send(clientSocket, response.c_str(), response.length(), 0);
     }

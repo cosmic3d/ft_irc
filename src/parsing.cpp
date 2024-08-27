@@ -68,9 +68,19 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         // Manejar la autenticación con contraseña
         std::cout << "Handling PASS" << std::endl;
         return handlePass(req, client_fd);
-    } 
+    } if (req.command == "NICK") {
+        // Manejar el comando NICK
+        std::cout << "Handling NICK" << std::endl;
+        return handleNick(req, client_fd);
+    } else if (req.command == "USER") {
+        // Manejar el comando USER
+        std::cout << "Handling USER" << std::endl;
+        std::string response = handleUser(req, client_fd);
+        bool checkRegistration = _clients[client_fd]->checkRegistered();
+        return checkRegistration ? response : "";
+    }
         // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
-    if (_clients[client_fd]->isAuthenticated() == false) {
+    if (_clients[client_fd]->isRegistered() == false) {
         //pass a vector list of parameters to the format_message function {"You have not registered"} DOES NOT WORK
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
@@ -78,15 +88,7 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         return format_message(_name, ERR_PASSWDMISMATCH, params);
     }
 
-    if (req.command == "NICK") {
-        // Manejar el comando NICK
-        std::cout << "Handling NICK" << std::endl;
-        return handleNick(req, client_fd);
-    } else if (req.command == "USER") {
-        // Manejar el comando USER
-        std::cout << "Handling USER" << std::endl;
-        return handleUser(req, client_fd);
-    } else if (req.command == "PING") {
+    if (req.command == "PING") {
         // Ejemplo de cómo manejar un comando PING
         std::cout << "Responding to PING" << std::endl;
         return ""; // TO_DO
