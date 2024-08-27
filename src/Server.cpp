@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/27 15:49:07 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:56:53 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ Server::Server(const std::string &name, int port, const std::string &password) {
     this->_password = password;
     this->_serverSocket = -1;
     this->_name = name;
-    this->_capabilitites = std::vector<std::string>();
-    this->_capabilitites.push_back("invite-notify");
     print_debug("Server created", colors::green, colors::italic);
     print_debug("Server name: " + this->_name, colors::green, colors::reset);
 }
@@ -87,16 +85,16 @@ void    Server::run() {
         for (size_t i = 0; i < _pollFds.size(); ++i) {
             if (_pollFds[i].revents & POLLIN) { // check if there's data to read
                 if (_pollFds[i].fd == _serverSocket) {
-                    handleConnection(); // TO-DO Handle a new incoming connection
+                    _handleConnection(); // TO-DO Handle a new incoming connection
                 } else {
-                    handleClient(_pollFds[i].fd); // TO-DO Handle data from existing client
+                    _handleClient(_pollFds[i].fd); // TO-DO Handle data from existing client
                 }
             }
         }
     }
 }
 
-void    Server::handleConnection() {
+void    Server::_handleConnection() {
     int clientSocket = accept(_serverSocket, NULL, NULL);
     if (clientSocket < 0) {
         std::cerr<< "Failed to accept client" << std::endl;
@@ -114,7 +112,7 @@ void    Server::handleConnection() {
     _clients[clientSocket] = new Client(clientSocket);
 }
 
-void    Server::handleClient(int clientSocket) {
+void    Server::_handleClient(int clientSocket) {
     // Size follows IRC protocol max message length and is memory efficient
     char buffer[512];
 
@@ -156,7 +154,7 @@ void    Server::handleClient(int clientSocket) {
     for (size_t i = 0; i < messages.size(); i++) {
         Request req = parse_request(messages[i]);
         // req.print();
-        std::string response = execute_command(req, clientSocket);
+        std::string response = _execute_command(req, clientSocket);
         if (response.empty()) {
             continue;
         }

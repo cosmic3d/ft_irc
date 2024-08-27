@@ -61,21 +61,21 @@ Request parse_request(const std::string& buffer) {
 }
 
 //Esto no va aquí pero me la suda
-std::string Server::execute_command(const Request& req, int client_fd) {
+std::string Server::_execute_command(const Request& req, int client_fd) {
     if (!req.valid) {
         return "";
     } else if (req.command == "PASS") {
         // Manejar la autenticación con contraseña
         std::cout << "Handling PASS" << std::endl;
-        return handlePass(req, client_fd);
+        return _handlePass(req, client_fd);
     } if (req.command == "NICK") {
         // Manejar el comando NICK
         std::cout << "Handling NICK" << std::endl;
-        return handleNick(req, client_fd);
+        return _handleNick(req, client_fd);
     } else if (req.command == "USER") {
         // Manejar el comando USER
         std::cout << "Handling USER" << std::endl;
-        std::string response = handleUser(req, client_fd);
+        std::string response = _handleUser(req, client_fd);
         bool checkRegistration = _clients[client_fd]->checkRegistered();
         return checkRegistration ? response : "";
     }

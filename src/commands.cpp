@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-std::string Server::handlePass(const Request& req, int client_fd) {
+std::string Server::_handlePass(const Request& req, int client_fd) {
     if (req.params.size() < 1) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
@@ -24,7 +24,7 @@ std::string Server::handlePass(const Request& req, int client_fd) {
     return "";
 }
 
-std::string Server::handleNick(const Request& req, int client_fd) {
+std::string Server::_handleNick(const Request& req, int client_fd) {
     // Verificar si se ha dado un nickname
     if (req.params.size() < 1) {
         std::vector<std::string> params;
@@ -53,7 +53,7 @@ std::string Server::handleNick(const Request& req, int client_fd) {
     return "";
 }
 
-std::string Server::handleUser(const Request& req, int client_fd) {
+std::string Server::_handleUser(const Request& req, int client_fd) {
     // Verificar si el usuario ya está autenticado
     if (_clients[client_fd]->isRegistered()) {
         std::vector<std::string> params;
