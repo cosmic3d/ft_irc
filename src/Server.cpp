@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 08:52:23 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/26 16:36:19 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,9 @@ void    Server::handleAuthentication(int clientSocket, const std::string &messag
     }
 }
 
-// void    Server::parseCommand(int clientSocket, const std::string &message) {
-    
-// }
+std::string	Server::_printMessage(std::string num, std::string nickname, std::string message)
+{
+	if (nickname.empty())
+		nickname = "*";
+	return (": Server " + num + " " + nickname + " " + message + "\n");
+}
