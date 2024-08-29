@@ -1,7 +1,5 @@
 #include "Server.hpp"
 #include "Client.hpp"
-//#include "Channel.hpp"
-//#include "Request.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -9,11 +7,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int port = std::stoi(argv[1]);
+    //port to num
+    int port;
+    std::stringstream(argv[1]) >> port;
     std::string password = argv[2];
 
     try {
-        Server ircServer(port, password);
+        Server ircServer(SERVER_NAME, port, password);
         ircServer.start();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

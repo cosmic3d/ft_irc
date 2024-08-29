@@ -6,17 +6,19 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 16:06:05 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/29 16:04:58 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(int port, const std::string &password) {
+Server::Server(const std::string &name, int port, const std::string &password) {
     this->_port = port;
     this->_password = password;
     this->_serverSocket = -1;
-    std::cout << "Server constructor called" << std::endl;
+    this->_name = name;
+    print_debug("Server created", colors::green, colors::italic);
+    print_debug("Server name: " + this->_name, colors::green, colors::reset);
 }
 
 Server::~Server() {
@@ -72,7 +74,7 @@ void    Server::init() {
  * sockets have activity and respond accordingly.
 */
 void    Server::run() {
-    while (true) {
+    while (42) {
         // Poll the set of file descriptors to see which ones are ready
         // data() returns a pointer to the first element of _pollFds, which is how poll() expects to receive the list of pollfd structures.
         int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
@@ -83,16 +85,16 @@ void    Server::run() {
         for (size_t i = 0; i < _pollFds.size(); ++i) {
             if (_pollFds[i].revents & POLLIN) { // check if there's data to read
                 if (_pollFds[i].fd == _serverSocket) {
-                    handleConnection(); // TO-DO Handle a new incoming connection
+                    _handleConnection(); // TO-DO Handle a new incoming connection
                 } else {
-                    handleClient(_pollFds[i].fd); // TO-DO Handle data from existing client
+                    _handleClient(_pollFds[i].fd); // TO-DO Handle data from existing client
                 }
             }
         }
     }
 }
 
-void    Server::handleConnection() {
+void    Server::_handleConnection() {
     int clientSocket = accept(_serverSocket, NULL, NULL);
     if (clientSocket < 0) {
         std::cerr<< "Failed to accept client" << std::endl;
@@ -106,20 +108,27 @@ void    Server::handleConnection() {
     _pollFds.push_back(clientPollfd);
 
     // Add new client to client class list (adds to clSo index for constant time access)
+    print_debug("New client connected: " + itos(clientSocket), colors::green, colors::bold);
     _clients[clientSocket] = new Client(clientSocket);
 }
 
-void    Server::handleClient(int clientSocket) {
+void    Server::_handleClient(int clientSocket) {
     // Size follows IRC protocol max message length and is memory efficient
     char buffer[512];
 
     // Recieve data from client
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
        if (bytesRead <= 0) {
+        print_debug("Client disconnected", colors::red, colors::bold);
         // If the client disconnected or an error occurred, close the connection
         close(clientSocket);
-        _pollFds.erase(std::remove_if(_pollFds.begin(), _pollFds.end(), 
-                    [clientSocket](pollfd pfd){ return pfd.fd == clientSocket; }), _pollFds.end());
+        //remove client socket from poll list
+        for (size_t i = 0; i < _pollFds.size(); ++i) {
+            if (_pollFds[i].fd == clientSocket) {
+                _pollFds.erase(_pollFds.begin() + i);
+                break;
+            }
+        }
         delete _clients[clientSocket];
         _clients.erase(clientSocket);
         return;
@@ -127,27 +136,31 @@ void    Server::handleClient(int clientSocket) {
 
     buffer[bytesRead] = '\0';
     std::string message(buffer);
-
-    // Check if client is authenticated before parsing command
-    if (!_clients[clientSocket]->isAuthenticated()) {
-        handleAuthentication(clientSocket, message);  // Handle authentication first
-        return;
+    print_debug("[" + itos(clientSocket) + "]", colors::cyan, colors::bold);
+    print_debug("CLIENT: " + message, colors::grey, colors::on_bright_cyan);
+    //split buffer using CR-LF as delimiter. without split function
+    std::vector<std::string> messages;
+    std::string delimiter = "\r\n";
+    size_t pos = 0;
+    std::string token;
+    while ((pos = message.find(delimiter)) != std::string::npos) {
+        token = message.substr(0, pos);
+        messages.push_back(token);
+        message.erase(0, pos + delimiter.length());
     }
+    messages.push_back(message);
 
-    // Parse and process the recieved command
-    parseCommand(clientSocket, message);
-}
-
-void    Server::handleAuthentication(int clientSocket, const std::string &message) {
-    if (message == _password) {
-        _clients[clientSocket]->setAuthenticated(true);
-        std::cout << "clientSocket: " << clientSocket << " has been authenticated" << std::endl;
-    } else {
-        // Send an error message and close the connection if the password is incorrect
-        close(clientSocket);
-        _pollFds.erase(std::remove_if(_pollFds.begin(), _pollFds.end(), 
-                    [clientSocket](pollfd pfd){ return pfd.fd == clientSocket; }), _pollFds.end());
-        delete _clients[clientSocket];
-        _clients.erase(clientSocket);
+    //parse, execute and send response for each message
+    for (size_t i = 0; i < messages.size(); i++) {
+        Request req = parse_request(messages[i]);
+        // req.print();
+        std::string response = _execute_command(req, clientSocket);
+        if (response.empty()) {
+            continue;
+        }
+        print_debug("SERVER: " + response, colors::cyan, colors::on_bright_grey);
+        if (send(clientSocket, response.c_str(), response.length(), 0) < 0) {
+            print_debug("Failed to send response: " + response, colors::red, colors::bold);
+        }
     }
 }

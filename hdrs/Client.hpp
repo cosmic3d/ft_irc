@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:31:10 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 08:50:58 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:42:37 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ private:
     int         _socket;
     std::string _nickname;
     std::string _username;
-    bool        _authenticated;
+    bool        _authenticated; //Password correct
+    bool        _registered; //Nick, user, pass correct
 
 public:
     Client(int socket);
@@ -29,9 +30,14 @@ public:
     
     int getSocket() const;
     void setNickname(const std::string &nickname);
+    void setUsername(const std::string &username);
     std::string getNickname() const;
+    std::string getUsername() const;
     bool    isAuthenticated() const;
-    void    setAuthenticated();
+    void    setAuthenticated(bool status);
+    bool    isRegistered() const;
+    void    setRegistered(bool status);
+    bool    checkRegistered();
 };
 
 #endif
