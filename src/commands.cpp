@@ -76,3 +76,16 @@ std::string Server::_handleUser(const Request& req, int client_fd) {
     params.push_back("Welcome to " + _name + " " + _clients[client_fd]->getUsername() + "!");
     return format_message(_name, RPL_WELCOME, params);
 }
+
+std::string	Server::_handleOperator(const Request& req, int client_fd) {
+	if (!this->_clients[i]->getRegistered())
+		return (_printMessage("451", this->_clients[i]->getNickName(), ":You have not registered"));
+	if (request.args.size() < 2)
+		return (_printMessage("461", this->_clients[i]->getNickName(), "PASS :Not enough parameters"));
+	if (request.args[0] != "ADMIN")
+		return (_printMessage("464", this->_clients[i]->getNickName(), ":Username/Password incorrect"));
+	if (request.args[1] != "DEEZNUTS")
+		return (_printMessage("464", this->_clients[i]->getNickName(), ":Username/Password incorrect"));
+	this->_clients[i]->setIsOperator(true);
+	return (_printMessage("381", this->_clients[i]->getNickName(), ":You are now an IRC operator"));
+}

@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/29 16:02:35 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/29 16:17:45 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class Server {
         std::string             _password;
         std::vector<pollfd>     _pollFds; // monitored by the server for events using poll()
         std::map<int, Client*>            _clients; // TO-DO
-        //std::map<std::string, Channel*>   _channels: // TO-DO
+        std::map<std::string, Channel*>   _channels; // TO-DO
 
     private:
         std::string                 _joinChannel(Request request, int i); // TO-DO
@@ -58,6 +58,7 @@ class Server {
         std::string _handlePass(const Request& req, int client_fd);
         std::string _handleNick(const Request& req, int client_fd);
         std::string _handleUser(const Request& req, int client_fd);
+        std::string _handleOperator(const Request& req, int client_fd)
         
     public:
         Server(const std::string &name, int port, const std::string &password);
