@@ -114,43 +114,39 @@ void    Server::handleConnection() {
     _clients[clientSocket] = new Client(clientSocket);
 }
 
+void    Server::handleDisconnection(int clientSocket) {
+    print_debug("Client disconnected", colors::red, colors::bold);
+    // If the client disconnected or an error occurred, close the connection
+    close(clientSocket);
+    //remove client socket from poll list
+    for (size_t i = 0; i < _pollFds.size(); ++i) {
+        if (_pollFds[i].fd == clientSocket) {
+            _pollFds.erase(_pollFds.begin() + i);
+            break;
+        }
+    }
+    delete _clients[clientSocket];
+    _clients.erase(clientSocket);
+    return;
+}
+
+
+
 void    Server::handleClient(int clientSocket) {
     // Size follows IRC protocol max message length and is memory efficient
     char buffer[512];
 
-    // Recieve data from client
+    // Recieve data from client NON_BLOCKING FLAG 
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-       if (bytesRead <= 0) {
-        print_debug("Client disconnected", colors::red, colors::bold);
-        // If the client disconnected or an error occurred, close the connection
-        close(clientSocket);
-        //remove client socket from poll list
-        for (size_t i = 0; i < _pollFds.size(); ++i) {
-            if (_pollFds[i].fd == clientSocket) {
-                _pollFds.erase(_pollFds.begin() + i);
-                break;
-            }
-        }
-        delete _clients[clientSocket];
-        _clients.erase(clientSocket);
-        return;
-    }
+    if (bytesRead <= 0)
+        handleDisconnection(clientSocket);
 
     buffer[bytesRead] = '\0';
     std::string message(buffer);
     print_debug("[" + itos(clientSocket) + "]", colors::cyan, colors::bold);
     print_debug("CLIENT: " + message, colors::grey, colors::on_bright_cyan);
     //split buffer using CR-LF as delimiter. without split function
-    std::vector<std::string> messages;
-    std::string delimiter = "\r\n";
-    size_t pos = 0;
-    std::string token;
-    while ((pos = message.find(delimiter)) != std::string::npos) {
-        token = message.substr(0, pos);
-        messages.push_back(token);
-        message.erase(0, pos + delimiter.length());
-    }
-    messages.push_back(message);
+    std::vector<std::string> messages = ft_split(message, "\r\n");
 
     //parse, execute and send response for each message
     for (size_t i = 0; i < messages.size(); i++) {

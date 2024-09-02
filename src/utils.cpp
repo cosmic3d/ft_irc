@@ -22,6 +22,19 @@ std::string itos(int n) {
 		stream << n;
 		return stream.str();
 }
+
+std::vector<std::string> ft_split(std::string &str, std::string delim) {
+		std::vector<std::string> result;
+		size_t pos = 0;
+    std::string token;
+    while ((pos = str.find(delim)) != std::string::npos) {
+        token = str.substr(0, pos);
+        result.push_back(token);
+        str.erase(0, pos + delim.length());
+    }
+    result.push_back(str);
+    return result;
+}
 // std::vector<std::string> list_to_vector(std::initializer_list<std::string> list){
 // 		return std::vector<std::string>(list);
 // }

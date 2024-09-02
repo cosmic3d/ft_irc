@@ -51,12 +51,14 @@ class Server {
         
         void    handleConnection();
         void    handleClient(int clientSocket); // TO-DO
+        void    handleDisconnection(int clientSocket);
         void    handleAuthentication(int clientSocket, const std::string &message); // TO-DO
         void    parseCommand(int clientSocket, const std::string &message);// TO-DO
         std::string execute_command(const Request& req, int client_fd);
         std::string handlePass(const Request& req, int client_fd);
         std::string handleNick(const Request& req, int client_fd);
         std::string handleUser(const Request& req, int client_fd);
+        std::string handleQuit(const Request& req, int client_fd);
         std::string format_message(const std::string& prefix, const std::string& command, const std::vector<std::string>& params);
 
         //command handlers for IRC commands pending

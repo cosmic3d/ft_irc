@@ -68,11 +68,29 @@ std::string Server::handleUser(const Request& req, int client_fd) {
         params.push_back("Not enough parameters");
         return format_message(_name, ERR_NEEDMOREPARAMS, params);
     }
-    // Establecer el nombre de usuario
-    // print_debug("Request params: " + req.params[0] + " " + req.params[1] + " " + req.params[2] + " " + req.params[3], colors::cyan, colors::reset);
-    _clients[client_fd]->setUsername(req.params[0]);
+    // Establecer el username
+    _clients[client_fd]->setUsername(req.params[0]); //RETRIBUIR AQUÍ TAMBIÉN EL MODE
+    // Establecer el hostname y enviar mensaje de bienvenida con formato RPL_WELCOME
     std::vector<std::string> params;
     params.push_back(_clients[client_fd]->getNickname());
-    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->getUsername() + "!");
+    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->getNickname() + "!" + _clients[client_fd]->getUsername() + "@" + _clients[client_fd]->getHostname());
     return format_message(_name, RPL_WELCOME, params);
+}
+
+std::string Server::handleQuit(const Request& req, int client_fd) {
+    // Verificar si el usuario ha dado un mensaje de salida
+    std::string quit_message = req.params.size() > 0 ? req.params[0] : "Client quit";
+    //Enviar mensaje de salida a todos los clientes
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+        if (it->first != client_fd) {
+            std::vector<std::string> params;
+            params.push_back(_clients[client_fd]->getNickname());
+            params.push_back(quit_message);
+            std::string message = format_message(_clients[client_fd]->getNickname(), "QUIT", params);
+            send(it->first, message.c_str(), message.length(), 0);
+        }
+    }
+    // Desconectar al cliente
+    handleDisconnection(client_fd);
+    return "";
 }

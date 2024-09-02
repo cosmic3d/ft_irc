@@ -79,6 +79,9 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         bool checkRegistration = _clients[client_fd]->checkRegistered();
         return checkRegistration ? response : "";
     }
+    else if (req.command == "QUIT") {
+        // Manejar el comando QUIT
+    }
         // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
     if (_clients[client_fd]->isRegistered() == false) {
         //pass a vector list of parameters to the format_message function {"You have not registered"} DOES NOT WORK

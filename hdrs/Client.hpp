@@ -21,6 +21,7 @@ private:
     int         _socket;
     std::string _nickname;
     std::string _username;
+    std::string _hostname;
     bool        _authenticated; //Password correct
     bool        _registered; //Nick, user, pass correct
 
@@ -29,8 +30,10 @@ public:
     ~Client();
     
     int getSocket() const;
+    void setHostname(const std::string &hostname);
     void setNickname(const std::string &nickname);
     void setUsername(const std::string &username);
+    std::string getHostname() const;
     std::string getNickname() const;
     std::string getUsername() const;
     bool    isAuthenticated() const;
@@ -38,6 +41,7 @@ public:
     bool    isRegistered() const;
     void    setRegistered(bool status);
     bool    checkRegistered();
+    std::string retrieveHostnameIp();
 };
 
 #endif

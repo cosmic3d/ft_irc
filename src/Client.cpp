@@ -12,7 +12,7 @@
 
 #include "Client.hpp"
 
-Client::Client(int socket) : _socket(socket), _authenticated(false) {
+Client::Client(int socket) : _socket(socket), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false) {
     std::cout << "_client[" << socket << "] created" << std::endl;
 }
 
@@ -26,12 +26,20 @@ int Client::getSocket() const {
     return _socket;
 }
 
+void Client::setHostname(const std::string &hostname) {
+    _hostname = hostname;
+}
+
 void Client::setNickname(const std::string &nickname) {
     _nickname = nickname;
 }
 
 void Client::setUsername(const std::string &username) {
     _username = username;
+}
+
+std::string Client::getHostname() const {
+    return _hostname;
 }
 
 std::string Client::getNickname() const {
@@ -61,4 +69,16 @@ void Client::setRegistered(bool status) {
 bool Client::checkRegistered() {
     this->setRegistered(!this->getNickname().empty() && !this->getUsername().empty() && this->isAuthenticated());
     return this->isRegistered();
+}
+//use getsockname with _socket to retrieve hostname (ip address)
+std::string Client::retrieveHostnameIp()
+{
+    struct sockaddr_in addr;
+    socklen_t addr_size = sizeof(struct sockaddr_in);
+    int res = getsockname(_socket, (struct sockaddr *)&addr, &addr_size);
+    if (res == -1)
+    {
+        return "Unknown";
+    }
+    return inet_ntoa(addr.sin_addr);
 }
