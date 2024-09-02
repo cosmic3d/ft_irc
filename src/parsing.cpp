@@ -98,8 +98,7 @@ std::string Server::_execute_command(const Request& req, int client_fd) {
     } else if (req.command == "JOIN") {
         // Manejar el comando JOIN
         std::cout << "Handling JOIN" << std::endl;
-        return ""; // TO_DO
-        // TO-DO: Implementar el manejo del comando JOIN
+        return (_joinChannel(req, client_fd)); // TO-DO
     } else if (req.command == "PART") {
         // Manejar el comando PART
         std::cout << "Handling PART" << std::endl;

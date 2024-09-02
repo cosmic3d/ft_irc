@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/29 16:17:45 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/02 13:26:46 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,9 @@
 #include <vector>
 
 #include "Client.hpp"
+#include "Channel.hpp"
+#include "Request.hpp"
+#include "utils.hpp"
 
 #define SERVER_NAME "LittleBigServer"
 #define PORT 8080
@@ -58,7 +61,8 @@ class Server {
         std::string _handlePass(const Request& req, int client_fd);
         std::string _handleNick(const Request& req, int client_fd);
         std::string _handleUser(const Request& req, int client_fd);
-        std::string _handleOperator(const Request& req, int client_fd)
+        std::string _handleOperator(const Request& req, int client_fd);
+        std::string	_printMessage(std::string num, std::string nickname, std::string message);
         
     public:
         Server(const std::string &name, int port, const std::string &password);

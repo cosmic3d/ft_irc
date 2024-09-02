@@ -6,12 +6,25 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:52:45 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/29 15:37:22 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/02 13:39:06 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
+
+#define	USERALREADYJOINED 0
+#define USERISJOINED 1
+#define NOTINCHANNEL 2
+#define BANNEDFROMCHAN 3
+#define TOOMANYCHANNELS 4
+#define BADCHANNELKEY 5
+#define CHANNELISFULL 6
+#define NOSUCHCHANNEL 7
+#define USERISBANNED 8
+#define BADCHANMASK 9
+#define USERNOTINCHANNEL -1
+#define USERNOTFOUND -1
 
 #include "Server.hpp"
 

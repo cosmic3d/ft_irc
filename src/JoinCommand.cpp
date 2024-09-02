@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/26 16:20:18 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/29 14:45:23 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/02 14:44:25 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,25 +18,20 @@ std::string Server::_joinChannel(Request request, int i) {
     // IRC Numeric reply codes: https://www.rfc-editor.org/rfc/rfc2812
     // Join command: https://dd.ircdocs.horse/refs/commands/join
     int j = 1;
-    
-    // Check if client is registered to server
-    if (!this->_clients[i]->isRegistered()) // TO-DO
-        return (_printMessage("451", this->_clients[i]->getNickname(), ":You have not registered"));
         
     // Check that there are arguments provided (channel names)
-    if (request.args.size() == 0) // TO-DO
+    if (request.params.size() <= 0)
         return (_printMessage("461", this->_clients[i]->getNickname(), ":Not enough parameters"));
-
-    if (request.args[0] == "0")
+    if (request.params[0] == "0")
         return (this->_clients[i]->leaveAllChannels()); // TO-DO
 
     // Seperate channel names by comas
-    std::vector<std::string> parsChannels(_commaSeparator(request.args[0]));
+    std::vector<std::string> parsChannels(_commaSeparator(request.params[0]));
     
     // If there are channel keys seperate by comas
     std::vector<std::string> parsKeys;
-    if (request.args.size() == 2)
-        parsKeys = _commaSeparator(request.args[1]);
+    if (request.params.size() == 2)
+        parsKeys = _commaSeparator(request.params[1]);
 
     std::vector<std::string>::iterator itChannels = parsChannels.begin();
     std::vector<std::string>::iterator itKeys = parsKeys.begin();
@@ -47,15 +42,24 @@ std::string Server::_joinChannel(Request request, int i) {
             j = _createPrvChannel(*itChannels, *itKeys, i);
         else
             j = _createChannel(*itChannels, i);
+		if (j == BADCHANMASK)
+			return (_printMessage("476", this->_clients[i]->getNickname(), *itChannels + " :Bad Channel Mask"));
+		if (j == BANNEDFROMCHAN)
+			return (_printMessage("474", this->_clients[i]->getNickname(), *itChannels + " :Cannot join channel (+b)"));
+		if (j == TOOMANYCHANNELS )
+			return (_printMessage("405", this->_clients[i]->getNickname(), *itChannels + " :You have joined too many channels"));
+		if (j == BADCHANNELKEY )
+			return (_printMessage("475", this->_clients[i]->getNickname(), *itChannels + " :Cannot join channel (+k)"));
+		if (j == CHANNELISFULL )
+			return (_printMessage("471", this->_clients[i]->getNickname(), *itChannels + " :Cannot join channel (+l)"));
+		if (j == NOSUCHCHANNEL)
+			return (_printMessage("403", this->_clients[i]->getNickname(), *itChannels + " :No such channel"));
+        if (itKeys != parsKeys.end())
+            itKeys++;
+        itChannels++;
     }
-}
-
-int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd) {
-	std::map<std::string, Channel *>::iterator it = this->_allChannels.find(ChannelName);
-
-    // If channel doesnt exist, create it
-
-    // Else join client to already existing channel checking channelkey
+    // --itChannels; ?
+    return ("");
 }
 
 int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
@@ -76,12 +80,12 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		if (it->second->getKey().empty())
 		{
 			int i = 0;
-			if (this->_clients[CreatorFd]->getisOperator() == true)
-				i = it->second->addOperator(this->_clients[CreatorFd]);
+			if (this->_clients[CreatorFd]->getisOperator() == true) // TO-DO
+				i = it->second->addOperator(this->_clients[CreatorFd]); // TO-DO
 			else
-				i = it->second->addMember(this->_clients[CreatorFd]);
+				i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
 			if (i == USERISJOINED)
-				this->_clients[CreatorFd]->joinChannel( it->first, it->second );
+				this->_clients[CreatorFd]->joinChannel( it->first, it->second ); // TO-DO
 			else if (i == USERALREADYJOINED)
 				return (USERALREADYJOINED);
 			else if (i == BANNEDFROMCHAN)
@@ -96,6 +100,15 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		}
 	}
 	return (USERISJOINED);
+}
+
+int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd) {
+	std::map<std::string, Channel *>::iterator it = this->_allChannels.find(ChannelName);
+
+    // If channel doesnt exist, create it
+    
+
+    // Else join client to already existing channel checking channelkey
 }
 
 std::vector<std::string> Server::_commaSeparator(std::string arg) {
