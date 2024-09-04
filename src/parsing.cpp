@@ -107,7 +107,7 @@ std::string Server::_execute_command(const Request& req, int client_fd) {
     } else if (req.command == "PRIVMSG") {
         // Manejar el comando PRIVMSG
         std::cout << "Handling PRIVMSG" << std::endl;
-        return ""; // TO_DO
+        return (_privmsg(request, i)); // TO_DO
         // TO-DO: Implementar el manejo del comando PRIVMSG
     } else if (req.command == "QUIT") {
         // Manejar el comando QUIT

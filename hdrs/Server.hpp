@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/04 15:11:39 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/04 16:03:24 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,10 @@ class Server {
         int		    _sendmsg(int destfd, std::string message);
         std::string _sendToAllUsers(Channel *channel, int senderFd, std::string message);
 
-        
+        std::string	_privmsg(Request request, int i);
+        std::string _privToUser(std::string User, std::string message, std::string cmd, int i);
+        std::string _privToChannel(std::string ChannelName, std::string message, int i);
+
     public:
         Server(const std::string &name, int port, const std::string &password);
         ~Server();

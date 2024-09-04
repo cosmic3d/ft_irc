@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/04 15:19:31 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/04 16:14:59 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,22 @@ std::string Server::_sendToAllUsers(Channel *channel, int senderFd, std::string 
             }
         }
         it++;
+    }
+    return ("");
+};
+
+std::string Server::_privmsg(Request request, int i) {
+    if (!this->_clients[i]->getRegistered())
+        return (_printMessage("451", this->_clients[i]->getNickName(), ":You have not registered"));
+    if (request.params.size() < 2)
+        return (_printMessage("461", this->_clients[i]->getNickName(), ":Not enough parameters"));
+    if (request.params.size() == 2)
+    {
+        if (request.params[0].find(",") != std::string::npos)
+            return (_printMessage("401", this->_clients[i]->getNickName(), request.params[0].append(" :Too many recipients.")));
+		if (request.params[0][0] != '&' && request.params[0][0] != '#' && request.params[0][0] != '+' && request.params[0][0] != '!')
+            return (_privToUser(request.params[0], request.params[1], "PRIVMSG", i));
+        return (_privToChannel(request.params[0], request.params[1], i));
     }
     return ("");
 };
