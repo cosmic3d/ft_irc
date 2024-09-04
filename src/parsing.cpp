@@ -94,11 +94,11 @@ std::string Server::_execute_command(const Request& req, int client_fd) {
         return ""; // TO_DO
         // Aquí se respondería con PONG al cliente
     } else if (req.command == "OPER") {
-        return (_handleOperator(req, client_fd)); // TO-DO
+        return (_handleOperator(req, client_fd));
     } else if (req.command == "JOIN") {
         // Manejar el comando JOIN
         std::cout << "Handling JOIN" << std::endl;
-        return (_joinChannel(req, client_fd)); // TO-DO
+        return (_joinChannel(req, client_fd));
     } else if (req.command == "PART") {
         // Manejar el comando PART
         std::cout << "Handling PART" << std::endl;

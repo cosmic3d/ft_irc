@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/02 13:26:46 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:11:39 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,10 @@ class Server {
         std::vector<pollfd>     _pollFds; // monitored by the server for events using poll()
         std::map<int, Client*>            _clients; // TO-DO
         std::map<std::string, Channel*>   _channels; // TO-DO
+        std::map<std::string, Channel *>    _allChannels;
 
     private:
-        std::string                 _joinChannel(Request request, int i); // TO-DO
+        std::string                 _joinChannel(Request request, int client_fd);
         int                         _createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd); // TO-DO
         int                         _createChannel( std::string ChannelName, int CreatorFd ); // TO-DO
         std::vector<std::string>    _commaSeparator(std::string arg);
@@ -63,6 +64,12 @@ class Server {
         std::string _handleUser(const Request& req, int client_fd);
         std::string _handleOperator(const Request& req, int client_fd);
         std::string	_printMessage(std::string num, std::string nickname, std::string message);
+
+    // messages
+    private:
+        int		    _sendmsg(int destfd, std::string message);
+        std::string _sendToAllUsers(Channel *channel, int senderFd, std::string message);
+
         
     public:
         Server(const std::string &name, int port, const std::string &password);

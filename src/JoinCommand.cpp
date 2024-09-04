@@ -6,14 +6,14 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/26 16:20:18 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/02 14:44:25 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:05:14 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
 // Method to handle the client's request to join one or more channels.
-std::string Server::_joinChannel(Request request, int i) {
+std::string Server::_joinChannel(Request request, int client_fd) {
     
     // IRC Numeric reply codes: https://www.rfc-editor.org/rfc/rfc2812
     // Join command: https://dd.ircdocs.horse/refs/commands/join
@@ -21,9 +21,9 @@ std::string Server::_joinChannel(Request request, int i) {
         
     // Check that there are arguments provided (channel names)
     if (request.params.size() <= 0)
-        return (_printMessage("461", this->_clients[i]->getNickname(), ":Not enough parameters"));
+        return (_printMessage("461", this->_clients[client_fd]->getNickName(), ":Not enough parameters"));
     if (request.params[0] == "0")
-        return (this->_clients[i]->leaveAllChannels()); // TO-DO
+        return (this->_clients[client_fd]->leaveAllChannels()); // TO-DO
 
     // Seperate channel names by comas
     std::vector<std::string> parsChannels(_commaSeparator(request.params[0]));
@@ -39,21 +39,21 @@ std::string Server::_joinChannel(Request request, int i) {
     // Iterate through list of channels to be joined.
     while (itChannels != parsChannels.end() && j == 1) {
         if (itKeys != parsKeys.end())
-            j = _createPrvChannel(*itChannels, *itKeys, i);
+            j = _createPrvChannel(*itChannels, *itKeys, client_fd);
         else
-            j = _createChannel(*itChannels, i);
+            j = _createChannel(*itChannels, client_fd);
 		if (j == BADCHANMASK)
-			return (_printMessage("476", this->_clients[i]->getNickname(), *itChannels + " :Bad Channel Mask"));
+			return (_printMessage("476", this->_clients[client_fd]->getNickName(), *itChannels + " :Bad Channel Mask"));
 		if (j == BANNEDFROMCHAN)
-			return (_printMessage("474", this->_clients[i]->getNickname(), *itChannels + " :Cannot join channel (+b)"));
+			return (_printMessage("474", this->_clients[client_fd]->getNickName(), *itChannels + " :Cannot join channel (+b)"));
 		if (j == TOOMANYCHANNELS )
-			return (_printMessage("405", this->_clients[i]->getNickname(), *itChannels + " :You have joined too many channels"));
+			return (_printMessage("405", this->_clients[client_fd]->getNickName(), *itChannels + " :You have joined too many channels"));
 		if (j == BADCHANNELKEY )
-			return (_printMessage("475", this->_clients[i]->getNickname(), *itChannels + " :Cannot join channel (+k)"));
+			return (_printMessage("475", this->_clients[client_fd]->getNickName(), *itChannels + " :Cannot join channel (+k)"));
 		if (j == CHANNELISFULL )
-			return (_printMessage("471", this->_clients[i]->getNickname(), *itChannels + " :Cannot join channel (+l)"));
+			return (_printMessage("471", this->_clients[client_fd]->getNickName(), *itChannels + " :Cannot join channel (+l)"));
 		if (j == NOSUCHCHANNEL)
-			return (_printMessage("403", this->_clients[i]->getNickname(), *itChannels + " :No such channel"));
+			return (_printMessage("403", this->_clients[client_fd]->getNickName(), *itChannels + " :No such channel"));
         if (itKeys != parsKeys.end())
             itKeys++;
         itChannels++;
@@ -80,7 +80,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		if (it->second->getKey().empty())
 		{
 			int i = 0;
-			if (this->_clients[CreatorFd]->getisOperator() == true) // TO-DO
+			if (this->_clients[CreatorFd]->getisOperator() == true)
 				i = it->second->addOperator(this->_clients[CreatorFd]); // TO-DO
 			else
 				i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
@@ -90,10 +90,10 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 				return (USERALREADYJOINED);
 			else if (i == BANNEDFROMCHAN)
 				return (BANNEDFROMCHAN);
-			_sendall(CreatorFd, this->_clients[CreatorFd]->getUserPerfix() + "JOIN " + ChannelName + "\n");
-			_sendall(CreatorFd, _printMessage("332", this->_clients[CreatorFd]->getNickName(), ChannelName + " :" + it->second->getTopic()));
-			_sendall(CreatorFd, _printMessage("353", this->_clients[CreatorFd]->getNickName() + " = " + ChannelName, it->second->listAllUsers()));
-			_sendall(CreatorFd, _printMessage("353", this->_clients[CreatorFd]->getNickName() + " " + ChannelName, ":End of NAMES list"));
+			_sendmsg(CreatorFd, this->_clients[CreatorFd]->getUserPerfix() + "JOIN " + ChannelName + "\n");
+			_sendmsg(CreatorFd, _printMessage("332", this->_clients[CreatorFd]->getNickName(), ChannelName + " :" + it->second->getTopic()));
+			_sendmsg(CreatorFd, _printMessage("353", this->_clients[CreatorFd]->getNickName() + " = " + ChannelName, it->second->listAllUsers()));
+			_sendmsg(CreatorFd, _printMessage("353", this->_clients[CreatorFd]->getNickName() + " " + ChannelName, ":End of NAMES list"));
 			std::string reply = "JOIN " + ChannelName + "\n";
 			_sendToAllUsers(it->second, CreatorFd, reply);
 			return (USERISJOINED);

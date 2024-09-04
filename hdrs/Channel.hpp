@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:52:45 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/02 13:39:06 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/04 14:36:28 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,32 +31,46 @@
 class Channel 
 {
     private:
+        char                    _prefix;
+        int                     _onlineUsers;
+        Client*                 _creator;
         std::string             _name;
         std::string             _topic;
         std::string				_key;
-        int                     _onlineUsers;
-        std::vector<Client*>    _clients;
-        Client *                _creator;
+        std::map<int, Client *> _members;
+        std::map<int, Client *> _operators;
+        //std::map<int, Client *> _voice; //?
+        std::vector<std::string>    _banned;
+
+    public:
+        Channel();
+        Channel(std::string channelName, Client *creator);
+        Channel(std::string channelName, std::string channelKey, Client *creator);
+        Channel(const Channel& x);
+        Channel &operator=(const Channel& rhs);
+        ~Channel();
 
    	public: /*             Getters                         */
         const std::string& getName() const;
         const std::string& getTopic() const;
         const std::string& getKey() const;
 
+    public: // modifiers
+		int		addMember( Client *member );
+		int		addOperator( Client *member );
+		void	addVoice( Client *member );
+		int		banUser( Client *member );
+		void	removeOperator( int i );
+		void	removeVoice( int i );
+		void	removeBanned( std::string NickName );
+		void	removeMember( int i );
+    
 	public: /*             Setters                         */
         void	setName(std::string name);
         void	setTopic(std::string topic);
         void	setKey(std::string key);
-
-    public:
-        Channel(const std::string &name, Client *creator);
-        ~Channel();
-
-        void addClient(Client *client);
-        void removeClient(Client *client);
-        void broadcastMessage(const std::string &message, Client *sender);
-        void setTopic(const std::string &topic);
-        bool isOperator(Client *client);
+        void    setPrefix(char prefix);
+        void    setOnlineUsers(int online);
 };
 
 #endif
