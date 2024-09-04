@@ -71,8 +71,7 @@ bool Client::checkRegistered() {
     return this->isRegistered();
 }
 //use getsockname with _socket to retrieve hostname (ip address)
-std::string Client::retrieveHostnameIp()
-{
+std::string Client::retrieveHostnameIp() const {
     struct sockaddr_in addr;
     socklen_t addr_size = sizeof(struct sockaddr_in);
     int res = getsockname(_socket, (struct sockaddr *)&addr, &addr_size);
@@ -81,4 +80,8 @@ std::string Client::retrieveHostnameIp()
         return "Unknown";
     }
     return inet_ntoa(addr.sin_addr);
+}
+
+std::string Client::formatPrefix() const {
+    return getNickname() + "!" + getUsername() + "@" + getHostname();
 }

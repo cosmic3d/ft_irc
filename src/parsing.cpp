@@ -62,7 +62,7 @@ Request parse_request(const std::string& buffer) {
 
 //Esto no va aquí pero me la suda
 std::string Server::execute_command(const Request& req, int client_fd) {
-    if (!req.valid) {
+    if (!req.valid || req.command == "CAP") {
         return "";
     } else if (req.command == "PASS") {
         // Manejar la autenticación con contraseña

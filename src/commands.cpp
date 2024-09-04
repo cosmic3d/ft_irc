@@ -48,8 +48,13 @@ std::string Server::handleNick(const Request& req, int client_fd) {
         params.push_back("Erroneous nickname");
         return format_message(_name, ERR_ERRONEUSNICKNAME, params);
     }
+    //Guardar el format message del anterior nickname para notificar al cliente el cambio de nickname
+    std::string acknoledgement = format_message(_clients[client_fd]->formatPrefix(), "NICK", req.params);
     // Establecer el nickname o cambiarlo
     _clients[client_fd]->setNickname(req.params[0]);
+    if (_clients[client_fd]->isRegistered()) {
+        return acknoledgement;
+    }
     return "";
 }
 
