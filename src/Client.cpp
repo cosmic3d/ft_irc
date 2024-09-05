@@ -6,15 +6,15 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/04 15:15:32 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:25:27 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(): _clientfd(0), _authenticated(false), _registered(false), _isOperator(false), _nickname(), _username(), _fullname(), _Host("deez.nuts"), _ID(), _remotaddr(), _addrlen(), _modes(), _joinedChannels() {};
-Client::Client( int fd ): _clientfd(fd), _authenticated(false), _registered(false), _isOperator(false), _nickname(), _username(), _fullname(), _Host("deez.nuts"), _ID(), _remotaddr(), _addrlen(), _modes(), _joinedChannels() {};
-Client::Client( const Client& x ): _Host(x._Host) { *this = x; };
+Client::Client(): _clientfd(0), _authenticated(false), _registered(false), _isOperator(false), _nickname(), _username(), _fullname(), _Host(SERVER_NAME), _ID(), _modes(), _joinedChannels() {};
+Client::Client( int fd ): _clientfd(fd), _authenticated(false), _registered(false), _isOperator(false), _nickname(), _username(), _fullname(), _Host(SERVER_NAME), _ID(), _modes(), _joinedChannels() {};
+Client::Client( const Client& x ) { *this = x; };
 
 
 Client & Client::operator=( const Client& rhs )
@@ -29,8 +29,6 @@ Client & Client::operator=( const Client& rhs )
 	this->_fullname = rhs._fullname;
 	this->_authenticated = rhs._authenticated;
 	this->_ID = rhs._ID;
-	this->_remotaddr = rhs._remotaddr;
-	this->_addrlen = rhs._addrlen;
 	this->_joinedChannels.insert(rhs._joinedChannels.begin(), rhs._joinedChannels.end());
 	return (*this);
 };

@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:52:45 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/04 14:36:28 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:08:31 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,18 +28,25 @@
 
 #include "Server.hpp"
 
+class Client;
+
 class Channel 
 {
     private:
         char                    _prefix;
-        int                     _onlineUsers;
         Client*                 _creator;
+        int                     _onlineUsers;
         std::string             _name;
-        std::string             _topic;
         std::string				_key;
+        std::string             _topic;
         std::map<int, Client *> _members;
         std::map<int, Client *> _operators;
-        //std::map<int, Client *> _voice; //?
+        /*  
+         *  Users with a plus sign (+) next to their nickname are voiced users. That
+            means that they are allowed to speak when the channel mode +m is set. +m
+            sets moderated mode which means that regular users may not speak.
+        */ 
+        std::map<int, Client *> _voice;
         std::vector<std::string>    _banned;
 
     public:
@@ -51,10 +58,16 @@ class Channel
         ~Channel();
 
    	public: /*             Getters                         */
-        const std::string& getName() const;
-        const std::string& getTopic() const;
-        const std::string& getKey() const;
-
+        const char        &getPrefix() const;
+        const int         &getOnlineUsers() const; 
+        const std::string &getName() const;
+        const std::string &getKey() const;
+        const std::string &getTopic() const;
+        const std::map<int, Client *> &getMembers() const;
+        const std::map<int, Client *> &getOperators() const;
+        const std::map<int, Client *> &getVoice() const;
+        Client*                         getCreator() const;
+        
     public: // modifiers
 		int		addMember( Client *member );
 		int		addOperator( Client *member );
@@ -71,6 +84,9 @@ class Channel
         void	setKey(std::string key);
         void    setPrefix(char prefix);
         void    setOnlineUsers(int online);
+
+    public:
+        std::pair<Client *, int>    findUserRole( int i );
 };
 
 #endif

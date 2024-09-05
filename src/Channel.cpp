@@ -6,17 +6,11 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/04 14:39:54 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:01:51 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
-
-Channel::Channel(const std::string &name, Client *creator) {
-    this->_name = name;
-    this->_creator = creator;
-    this->_onlineUsers = 1;
-}
 
 Channel::Channel(std::string channelName, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _name(channelName), _key(), _topic(), _members(), _operators(), _voice(), _banned()
 {
@@ -50,11 +44,24 @@ std::string						const &Channel::getTopic()			const { return this->_topic; };
 std::map<int, Client *>			const &Channel::getMembers()		const { return this->_members; };
 std::map<int, Client *>			const &Channel::getOperators()		const { return this->_operators; };
 std::map<int, Client *>			const &Channel::getVoice()			const { return this->_voice; };
-
-Client*		Channel::getCreator() const { return (this->_creator); };
+Client*							       Channel::getCreator() 		const { return (this->_creator); };
 
 void	Channel::setPrefix(char prefix)			{ this->_prefix = prefix; };
 void	Channel::setOnlineUsers(int online)		{ this->_onlineUsers = online; };
 void	Channel::setName(std::string name)		{ this->_name = name; };
 void	Channel::setKey(std::string key)		{ this->_key = key; };
 void	Channel::setTopic(std::string topic)	{ this->_topic = topic; };
+
+std::pair<Client *, int> Channel::findUserRole( int i )
+{
+	std::map<int, Client *>::iterator it = this->_members.find(i);
+	if (it != this->_members.end())
+		return (std::pair<Client *, int>(it->second, 0));
+	it = this->_operators.find(i);
+	if (it != this->_operators.end())
+		return (std::pair<Client *, int>(it->second, 1));
+	it = this->_voice.find(i);
+	if (it != this->_voice.end())
+		return (std::pair<Client *, int>(it->second, 2));
+	return (std::pair<Client *, int>(NULL, -1));
+};

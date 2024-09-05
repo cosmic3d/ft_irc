@@ -76,14 +76,14 @@ std::string Server::_execute_command(const Request& req, int client_fd) {
         // Manejar el comando USER
         std::cout << "Handling USER" << std::endl;
         std::string response = _handleUser(req, client_fd);
-        bool checkRegistration = _clients[client_fd]->checkRegistered();
+        bool checkRegistration = _clients[client_fd]->getRegistered();
         return checkRegistration ? response : "";
     }
         // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
-    if (_clients[client_fd]->isRegistered() == false) {
+    if (_clients[client_fd]->getRegistered() == false) {
         //pass a vector list of parameters to the format_message function {"You have not registered"} DOES NOT WORK
         std::vector<std::string> params;
-        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back(_clients[client_fd]->getNickName());
         params.push_back("You have not registered. Please use the PASS command to authenticate.");
         return format_message(_name, ERR_PASSWDMISMATCH, params);
     }
@@ -107,7 +107,7 @@ std::string Server::_execute_command(const Request& req, int client_fd) {
     } else if (req.command == "PRIVMSG") {
         // Manejar el comando PRIVMSG
         std::cout << "Handling PRIVMSG" << std::endl;
-        return (_privmsg(request, i)); // TO_DO
+        return (_privmsg(req, client_fd)); // TO_DO
         // TO-DO: Implementar el manejo del comando PRIVMSG
     } else if (req.command == "QUIT") {
         // Manejar el comando QUIT
@@ -122,7 +122,7 @@ std::string Server::_execute_command(const Request& req, int client_fd) {
     } else {
         // Responder con un error al cliente
         std::vector<std::string> params;
-        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back(_clients[client_fd]->getNickName());
         params.push_back("Unknown command " + req.command);
         return format_message(_name, ERR_UNKNOWNCOMMAND, params);
     }

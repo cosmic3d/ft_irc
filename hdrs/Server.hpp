@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/04 16:03:24 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/05 14:21:18 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,8 @@ class Server {
 
         std::string	_privmsg(Request request, int i);
         std::string _privToUser(std::string User, std::string message, std::string cmd, int i);
-        std::string _privToChannel(std::string ChannelName, std::string message, int i);
+        std::string _privToChannel(std::string ChannelName, std::string message, std::string cmd, int i);      
+        int         _findFdByNickName(std::string NickName);
 
     public:
         Server(const std::string &name, int port, const std::string &password);

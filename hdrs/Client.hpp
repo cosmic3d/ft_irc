@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:31:10 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/04 13:54:14 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/05 14:28:30 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 #include <string>
 #include "Server.hpp"
+
+class Channel;
 
 class Client 
 {
