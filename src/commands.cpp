@@ -83,18 +83,9 @@ std::string Server::handleUser(const Request& req, int client_fd) {
 }
 
 std::string Server::handleQuit(const Request& req, int client_fd) {
-    // Verificar si el usuario ha dado un mensaje de salida
-    std::string quit_message = req.params.size() > 0 ? req.params[0] : "Client quit";
-    //Enviar mensaje de salida a todos los clientes
-    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
-        if (it->first != client_fd) {
-            std::vector<std::string> params;
-            params.push_back(_clients[client_fd]->getNickname());
-            params.push_back(quit_message);
-            std::string message = format_message(_clients[client_fd]->getNickname(), "QUIT", params);
-            send(it->first, message.c_str(), message.length(), 0);
-        }
-    }
+    //Enviar al usuario un reconocimiento de que se ha desconectado
+    std::string server_response = format_message(_clients[client_fd]->formatPrefix(), "QUIT", req.params);
+    send(client_fd, server_response.c_str(), server_response.length(), 0);
     // Desconectar al cliente
     handleDisconnection(client_fd);
     return "";

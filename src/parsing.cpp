@@ -64,23 +64,19 @@ Request parse_request(const std::string& buffer) {
 std::string Server::execute_command(const Request& req, int client_fd) {
     if (!req.valid || req.command == "CAP") {
         return "";
-    } else if (req.command == "PASS") {
-        // Manejar la autenticación con contraseña
-        std::cout << "Handling PASS" << std::endl;
+    }
+    print_debug("Handling command: " + req.command, colors::cyan, colors::bold);
+    if (req.command == "PASS") {
         return handlePass(req, client_fd);
     } if (req.command == "NICK") {
-        // Manejar el comando NICK
-        std::cout << "Handling NICK" << std::endl;
         return handleNick(req, client_fd);
     } else if (req.command == "USER") {
-        // Manejar el comando USER
-        std::cout << "Handling USER" << std::endl;
         std::string response = handleUser(req, client_fd);
         bool checkRegistration = _clients[client_fd]->checkRegistered();
         return checkRegistration ? response : "";
     }
     else if (req.command == "QUIT") {
-        // Manejar el comando QUIT
+        return handleQuit(req, client_fd);
     }
         // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
     if (_clients[client_fd]->isRegistered() == false) {

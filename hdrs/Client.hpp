@@ -41,7 +41,7 @@ public:
     bool    isRegistered() const;
     void    setRegistered(bool status);
     bool    checkRegistered();
-    std::string retrieveHostnameIp();
+    std::string retrieveHostnameIp() const;
     std::string formatPrefix() const;
 };
 

@@ -136,8 +136,8 @@ void    Server::handleClient(int clientSocket) {
     // Size follows IRC protocol max message length and is memory efficient
     char buffer[512];
 
-    // Recieve data from client NON_BLOCKING FLAG 
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    // Recieve data from client in a non-blocking way
+    int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
     if (bytesRead <= 0)
         handleDisconnection(clientSocket);
 
