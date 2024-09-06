@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 11:38:46 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/06 16:46:19 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ bool		Client::getAuth()			const { return (this->_authenticated); };
 int			Client::getClientfd()		const { return (this->_clientfd); };
 int			Client::getRegistered()		const { return (this->_registered); };
 int			Client::getisOperator()		const { return (this->_isOperator); };
+
 // int			Client::getMode(char mode)	const
 // {
 // 	if (mode == 'a')
