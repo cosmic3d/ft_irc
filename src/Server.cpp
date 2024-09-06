@@ -6,16 +6,20 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/27 15:08:46 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/08/21 12:49:51 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
 Server::Server(const std::string &name, int port, const std::string &password) {
+Server::Server(const std::string &name, int port, const std::string &password) {
     this->_port = port;
     this->_password = password;
     this->_serverSocket = -1;
+    this->_name = name;
+    print_debug("Server created", colors::green, colors::italic);
+    print_debug("Server name: " + this->_name, colors::green, colors::reset);
     this->_name = name;
     print_debug("Server created", colors::green, colors::italic);
     print_debug("Server name: " + this->_name, colors::green, colors::reset);
@@ -79,6 +83,7 @@ void    Server::init() {
 */
 void    Server::run() {
     while (42) {
+    while (42) {
         // Poll the set of file descriptors to see which ones are ready
         // data() returns a pointer to the first element of _pollFds, which is how poll() expects to receive the list of pollfd structures.
         int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
@@ -89,16 +94,16 @@ void    Server::run() {
         for (size_t i = 0; i < _pollFds.size(); ++i) {
             if (_pollFds[i].revents & POLLIN) { // check if there's data to read
                 if (_pollFds[i].fd == _serverSocket) {
-                    handleConnection(); // TO-DO Handle a new incoming connection
+                    _handleConnection(); // TO-DO Handle a new incoming connection
                 } else {
-                    handleClient(_pollFds[i].fd); // TO-DO Handle data from existing client
+                    _handleClient(_pollFds[i].fd); // TO-DO Handle data from existing client
                 }
             }
         }
     }
 }
 
-void    Server::handleConnection() {
+void    Server::_handleConnection() {
     int clientSocket = accept(_serverSocket, NULL, NULL);
     if (clientSocket < 0) {
         std::cerr<< "Failed to accept client" << std::endl;
@@ -112,6 +117,8 @@ void    Server::handleConnection() {
     _pollFds.push_back(clientPollfd);
 
     // Add new client to client class list (adds to clSo index for constant time access)
+    print_debug("New client connected: " + itos(clientSocket), colors::green, colors::bold);
+    _clients[clientSocket] = new Client(clientSocket);
     print_debug("New client connected: " + itos(clientSocket), colors::green, colors::bold);
     _clients[clientSocket] = new Client(clientSocket);
 }
