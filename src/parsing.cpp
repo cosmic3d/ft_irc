@@ -67,28 +67,28 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     }
     print_debug("Handling command: " + req.command, colors::cyan, colors::bold);
     if (req.command == "PASS") {
-        std::string response = handlePass(req, client_fd);
+        std::string response = _handlePass(req, client_fd);
         bool checkRegistration = _clients[client_fd]->checkRegistered();
         return checkRegistration ? response : "";
     }
     else  if (req.command == "NICK") {
-        std::string response = handleNick(req, client_fd);
+        std::string response = _handleNick(req, client_fd);
         bool checkRegistration = _clients[client_fd]->checkRegistered();
         return checkRegistration ? response : "";
     }
     else if (req.command == "USER") {
-        std::string response = handleUser(req, client_fd);
+        std::string response = _handleUser(req, client_fd);
         bool checkRegistration = _clients[client_fd]->checkRegistered();
         return checkRegistration ? response : "";
     }
     else if (req.command == "QUIT") {
-        return handleQuit(req, client_fd);
+        return _handleQuit(req, client_fd);
     }
         // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
     if (_clients[client_fd]->getRegistered() == false) {
         //pass a vector list of parameters to the format_message function {"You have not registered"} DOES NOT WORK
         std::vector<std::string> params;
-        params.push_back(_clients[client_fd]->getNickName());
+        params.push_back(_clients[client_fd]->getNickname());
         params.push_back("You have not registered. Please use the PASS command to authenticate.");
         return format_message(_name, ERR_PASSWDMISMATCH, params);
     }
@@ -127,7 +127,7 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     } else {
         // Responder con un error al cliente
         std::vector<std::string> params;
-        params.push_back(_clients[client_fd]->getNickName());
+        params.push_back(_clients[client_fd]->getNickname());
         params.push_back("Unknown command " + req.command);
         return format_message(_name, ERR_UNKNOWNCOMMAND, params);
     }

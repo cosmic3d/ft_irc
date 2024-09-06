@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 13:37:36 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/06 17:48:36 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ std::pair<Client *, int> Channel::findUserRole( int i )
 
 int	Channel::addMember( Client *member )
 {
-	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickName()) != this->_banned.end())
+	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickname()) != this->_banned.end())
 		return (BANNEDFROMCHAN);
 	if (this->_members.find(member->getClientfd()) == this->_members.end())
 	{
@@ -81,7 +81,7 @@ int	Channel::addMember( Client *member )
 
 int	Channel::addOperator( Client *member )
 {
-	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickName()) != this->_banned.end())
+	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickname()) != this->_banned.end())
 		return (BANNEDFROMCHAN);
 	if (this->_operators.find(member->getClientfd()) == this->_operators.end())
 	{
@@ -94,9 +94,9 @@ int	Channel::addOperator( Client *member )
 
 int	Channel::banUser( Client *member )
 {
-	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickName()) != this->_banned.end())
+	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickname()) != this->_banned.end())
 		return (BANNEDFROMCHAN);
-	this->_banned.push_back(member->getNickName());
+	this->_banned.push_back(member->getNickname());
 	return (USERISBANNED);
 };
 
@@ -131,19 +131,19 @@ std::string		Channel::listAllUsers() const
 	std::map<int, Client *>::const_iterator it = this->_operators.begin();
 	while (it != this->_operators.end())
 	{
-		AllUsers.append("@" + it->second->getNickName() + " ");
+		AllUsers.append("@" + it->second->getNickname() + " ");
 		it++;
 	}
 	it = this->_members.begin();
 	while (it != this->_members.end())
 	{
-		AllUsers.append(it->second->getNickName() + " ");
+		AllUsers.append(it->second->getNickname() + " ");
 		it++;
 	}
 	it = this->_voice.begin();
 	while (it != this->_voice.end())
 	{
-		AllUsers.append("+" + it->second->getNickName() + " ");
+		AllUsers.append("+" + it->second->getNickname() + " ");
 		it++;
 	}
 	return (AllUsers);

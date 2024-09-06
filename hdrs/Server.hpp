@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 17:11:15 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/06 19:06:19 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,16 @@
 
 #include <iostream>
 #include <sstream>
-#include <sstream>
-#include <unistd.h>
-#include <vector>
-#include <map>
-#include <vector>
 #include <map>
 #include <arpa/inet.h>
 #include <poll.h>
 #include <cstring>
-#include "Client.hpp"
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <unistd.h>
+
+#include <cerrno>
 
 #define SERVER_NAME "LittleBigServer"
 #define PORT 8080
@@ -49,13 +49,14 @@ class Server {
         std::string                 _joinChannel(Request request, int client_fd);
         int                         _createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd); // TO-DO
         int                         _createChannel( std::string ChannelName, int CreatorFd ); // TO-DO
-        std::vector<std::string>    _commaSeparator(std::string arg);
         void    _handleConnection();
+        void    _handleDisconnection(int clientSocket);
         void    _handleClient(int clientSocket); // TO-DO
         std::string _execute_command(const Request& req, int client_fd);
         std::string _handlePass(const Request& req, int client_fd);
         std::string _handleNick(const Request& req, int client_fd);
         std::string _handleUser(const Request& req, int client_fd);
+        std::string _handleQuit(const Request& req, int client_fd);
         std::string _handleOperator(const Request& req, int client_fd);
         std::string	_printMessage(std::string num, std::string nickname, std::string message);
 
@@ -81,6 +82,8 @@ class Server {
         void    handleClient(int clientSocket); // TO-DO
         void    handleAuthentication(int clientSocket, const std::string &message); // TO-DO
         void    parseCommand(int clientSocket, const std::string &message);// TO-DO
+        std::string execute_command(const Request& req, int client_fd);
+        std::string format_message(const std::string& prefix, const std::string& command, const std::vector<std::string>& params);
 
         //command handlers for IRC commands pending
         

@@ -6,20 +6,16 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 11:15:01 by damendez          #+#    #+#             */
-/*   Updated: 2024/08/21 12:49:51 by damendez         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:08:46 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
 Server::Server(const std::string &name, int port, const std::string &password) {
-Server::Server(const std::string &name, int port, const std::string &password) {
     this->_port = port;
     this->_password = password;
     this->_serverSocket = -1;
-    this->_name = name;
-    print_debug("Server created", colors::green, colors::italic);
-    print_debug("Server name: " + this->_name, colors::green, colors::reset);
     this->_name = name;
     print_debug("Server created", colors::green, colors::italic);
     print_debug("Server name: " + this->_name, colors::green, colors::reset);
@@ -83,7 +79,6 @@ void    Server::init() {
 */
 void    Server::run() {
     while (42) {
-    while (42) {
         // Poll the set of file descriptors to see which ones are ready
         // data() returns a pointer to the first element of _pollFds, which is how poll() expects to receive the list of pollfd structures.
         int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
@@ -119,11 +114,9 @@ void    Server::_handleConnection() {
     // Add new client to client class list (adds to clSo index for constant time access)
     print_debug("New client connected: " + itos(clientSocket), colors::green, colors::bold);
     _clients[clientSocket] = new Client(clientSocket);
-    print_debug("New client connected: " + itos(clientSocket), colors::green, colors::bold);
-    _clients[clientSocket] = new Client(clientSocket);
 }
 
-void    Server::handleDisconnection(int clientSocket) {
+void    Server::_handleDisconnection(int clientSocket) {
     print_debug("Client disconnected", colors::red, colors::bold);
     // If the client disconnected or an error occurred, close the connection
     close(clientSocket);
@@ -142,14 +135,14 @@ void    Server::handleDisconnection(int clientSocket) {
 
 
 
-void Server::handleClient(int clientSocket) {
+void Server::_handleClient(int clientSocket) {
     char buffer[512];
 
     // Recibir datos del cliente de forma no bloqueante
     std::cout << "Receiving data from client" << std::endl;
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead == 0) {
-        handleDisconnection(clientSocket);
+        _handleDisconnection(clientSocket);
         return;
     }
     else if (bytesRead < 0) {

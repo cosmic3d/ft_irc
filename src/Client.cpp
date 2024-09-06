@@ -6,14 +6,14 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 17:14:45 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/06 19:25:39 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(): _clientfd(0), _nickname(), _username(), _fullname(), _ID(), _authenticated(false), _registered(false), _isOperator(false), _joinedChannels() {};
-Client::Client( int fd ): _clientfd(fd), _nickname(), _username(), _fullname(), _ID(), _authenticated(false), _registered(false), _isOperator(false), _joinedChannels() {};
+Client::Client(): _clientfd(0), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _isOperator(false), _joinedChannels() {};
+Client::Client( int fd ): _clientfd(fd), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _isOperator(false), _joinedChannels() {};
 Client::Client( const Client& x ) { *this = x; };
 
 
@@ -26,23 +26,23 @@ Client & Client::operator=( const Client& rhs )
 	this->_isOperator = rhs._isOperator;
 	this->_nickname = rhs._nickname;
 	this->_username = rhs._username;
-	this->_fullname = rhs._fullname;
+	this->_hostname = retrieveHostnameIp();
 	this->_authenticated = rhs._authenticated;
-	this->_ID = rhs._ID;
 	this->_joinedChannels.insert(rhs._joinedChannels.begin(), rhs._joinedChannels.end());
 	return (*this);
 };
 
 Client::~Client() {};
 
-std::string	Client::getUserName()		const { return (this->_username); };
-std::string	Client::getNickName()		const { return (this->_nickname); };
-std::string	Client::getFullName()		const { return (this->_fullname); };
-std::string Client::getID()				const { return (this->_ID); }
+std::string	Client::getUsername()		const { return (this->_username); };
+std::string	Client::getNickname()		const { return (this->_nickname); };
+std::string	Client::getHostname()		const { return  (this->_hostname); };
 bool		Client::getAuth()			const { return (this->_authenticated); };
 int			Client::getClientfd()		const { return (this->_clientfd); };
 int			Client::getRegistered()		const { return (this->_registered); };
-int			Client::getisOperator()		const { return (this->_isOperator); };
+int			Client::getOperator()		const { return (this->_isOperator); };
+std::string &Client::getReceiveBuffer() { return _receiveBuffer; };
+void Client::appendToReceiveBuffer(const std::string &data) { _receiveBuffer += data; };
 
 // int			Client::getMode(char mode)	const
 // {
@@ -64,10 +64,8 @@ int			Client::getisOperator()		const { return (this->_isOperator); };
 // }
 
 
-void		Client::setUserName(std::string UserName)	{ this->_username = UserName; };
-void		Client::setNickName( std::string NickName )	{ this->_nickname = NickName; };
-void		Client::setFullName( std::string FullName )	{ this->_fullname = FullName; };
-void		Client::setID( std::string ID )				{ this->_ID = ID; };
+void		Client::setUsername(std::string username)	{ this->_username = username; };
+void		Client::setNickname( std::string nickname )	{ this->_nickname = nickname; };
 void		Client::setClientfd( int Clientfd )			{ this->_clientfd = Clientfd; };
 void		Client::setRegistered( int Registered )		{ this->_registered = Registered; };
 void		Client::setAuth( int Auth )					{ this->_authenticated = Auth; };
@@ -115,7 +113,7 @@ std::string	Client::joinedChannels() const
 		channels.append(it->first + ":\n");
 		channels.append("\tChannel Name: " + it->first + "\n");
 		channels.append("\tChannel Name inside class: " + it->second->getName() + "\n");
-		channels.append("\tChannel Creator: " + it->second->getCreator()->getFullName() + "\n");
+		channels.append("\tChannel Creator: " + it->second->getCreator()->getNickname() + "\n");
 		it++;
 	};
 	return (channels);
@@ -148,7 +146,6 @@ std::string	Client::getUserInfo() const
 {
 	std::string	userInfo;
 	userInfo.append("User Name: " + this->_username + "\n");
-	userInfo.append("Full Name: " + this->_fullname + "\n");
 	userInfo.append("Nick Name: " + this->_nickname + "\n");
 	userInfo.append("Host: \n");
 	//userInfo.append("Joined Channels: " + std::to_string(this->_joinedChannels.size()) + "\n");
@@ -156,6 +153,24 @@ std::string	Client::getUserInfo() const
 	return (userInfo);
 };
 
-std::string		Client::getUserPerfix() const { return (":" + this->_nickname + "!" + this->_username + "@" + SERVER_NAME + " "); };
+std::string Client::formatPrefix() const {
+    return getNickname() + "!" + getUsername() + "@" + getHostname();
+}
+
+bool Client::checkRegistered() {
+    this->setRegistered(!this->getNickname().empty() && !this->getUsername().empty() && this->getAuth());
+    return this->getRegistered();
+}
+//use getsockname with _socket to retrieve hostname (ip address)
+std::string Client::retrieveHostnameIp() const {
+    struct sockaddr_in addr;
+    socklen_t addr_size = sizeof(struct sockaddr_in);
+    int res = getsockname(this->getClientfd(), (struct sockaddr *)&addr, &addr_size);
+    if (res == -1)
+    {
+        return "Unknown";
+    }
+    return inet_ntoa(addr.sin_addr);
+}
 
 std::map<std::string, Channel *>	Client::getJoinedChannels() const { return (this->_joinedChannels); };

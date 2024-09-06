@@ -180,6 +180,7 @@
 #define ERR_INVITEONLYCHAN    "473" // "<channel> :Cannot join channel (+i)"
 #define ERR_BANNEDFROMCHAN    "474" // "<channel> :Cannot join channel (+b)"
 #define ERR_BADCHANNELKEY     "475" // "<channel> :Cannot join channel (+k)"
+#define ERR_BADCHANNELMASK    "476" // "<channel> :Cannot join channel (+k)"
 #define ERR_NOPRIVILEGES      "481" // ":Permission Denied- You're not an IRC operator"
 #define ERR_CHANOPRIVSNEEDED  "482" // "<channel> :You're not channel operator"
 #define ERR_CANTKILLSERVER    "483" // ":You can't kill a server!"

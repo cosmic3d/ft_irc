@@ -22,9 +22,5 @@ void print_debug(const std::string &message, std::ostream& (*color)(std::ostream
 std::string itos(int n);
 std::vector<std::string> ft_split(std::string &str, std::string delim);
 bool isAlphaNumeric(const std::string &str);
-//a function which returns a vector of strings and receives a list like {"a", "b", "c"}
-// std::vector<std::string> list_to_vector(std::initializer_list<std::string> list);
-//how to use
-//format_message("prefix", "command", list_to_vector({"a", "b", "c"})); NO FUNCIONA PORQUE EN C++98 NO SE PUEDE INICIALIZAR UN VECTOR CON UNA LISTA
 
 #endif
