@@ -6,14 +6,14 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/05 15:25:27 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/06 11:38:46 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(): _clientfd(0), _authenticated(false), _registered(false), _isOperator(false), _nickname(), _username(), _fullname(), _Host(SERVER_NAME), _ID(), _modes(), _joinedChannels() {};
-Client::Client( int fd ): _clientfd(fd), _authenticated(false), _registered(false), _isOperator(false), _nickname(), _username(), _fullname(), _Host(SERVER_NAME), _ID(), _modes(), _joinedChannels() {};
+Client::Client(): _clientfd(0), _nickname(), _username(), _fullname(), _ID(), _authenticated(false), _registered(false), _isOperator(false), _joinedChannels() {};
+Client::Client( int fd ): _clientfd(fd), _nickname(), _username(), _fullname(), _ID(), _authenticated(false), _registered(false), _isOperator(false), _joinedChannels() {};
 Client::Client( const Client& x ) { *this = x; };
 
 
@@ -38,7 +38,6 @@ Client::~Client() {};
 std::string	Client::getUserName()		const { return (this->_username); };
 std::string	Client::getNickName()		const { return (this->_nickname); };
 std::string	Client::getFullName()		const { return (this->_fullname); };
-std::string Client::getHost()			const { return (this->_host); };
 std::string Client::getID()				const { return (this->_ID); }
 bool		Client::getAuth()			const { return (this->_authenticated); };
 int			Client::getClientfd()		const { return (this->_clientfd); };
@@ -112,10 +111,10 @@ std::string	Client::joinedChannels() const
 	std::map<std::string, Channel *>::const_iterator it = this->_joinedChannels.begin();
 	while (it != this->_joinedChannels.end())
 	{
-		//channels.append(BLUE + it->first + RESET + ":\n");
-		//channels.append(YELLOW "\tChannel Name: " RESET + it->first + "\n");
-		//channels.append(YELLOW "\tChannel Name inside class: " RESET + it->second->getName() + "\n");
-		//channels.append(YELLOW  "\tChannel Creator: " RESET + it->second->getCreator()->getFullName() + "\n");
+		channels.append(it->first + ":\n");
+		channels.append("\tChannel Name: " + it->first + "\n");
+		channels.append("\tChannel Name inside class: " + it->second->getName() + "\n");
+		channels.append("\tChannel Creator: " + it->second->getCreator()->getFullName() + "\n");
 		it++;
 	};
 	return (channels);
@@ -147,46 +146,15 @@ std::string	Client::leaveAllChannels()
 std::string	Client::getUserInfo() const
 {
 	std::string	userInfo;
-	userInfo.append("User Name: " + this->_UserName + "\n");
-	userInfo.append("Full Name: " + this->_FullName + "\n");
-	userInfo.append("Nick Name: " + this->_NickName + "\n");
-	userInfo.append("Host: " + this->_Host + "\n");
-	userInfo.append("Joined Channels: " + std::to_string(this->_joinedChannels.size()) + "\n");
+	userInfo.append("User Name: " + this->_username + "\n");
+	userInfo.append("Full Name: " + this->_fullname + "\n");
+	userInfo.append("Nick Name: " + this->_nickname + "\n");
+	userInfo.append("Host: \n");
+	//userInfo.append("Joined Channels: " + std::to_string(this->_joinedChannels.size()) + "\n");
 	userInfo.append("\n");
 	return (userInfo);
 };
 
-std::string	Client::getAllChannels() const
-{
-	std::string channels(YELLOW "███████████████████████████████████████████████████████████████████████████████████████\n");
-	channels.append("█              █              █                    █                                  █\n");
-	channels.append("█" RESET " Channel Name " YELLOW "█ " RESET "Online Users " YELLOW "█ " RESET "Creator Of Channel " YELLOW "█ " RESET "          Channel Topic          " YELLOW "█\n");
-	channels.append("█              █              █                    █                                  █\n");
-	channels.append("███████████████████████████████████████████████████████████████████████████████████████\n");
-	std::map<std::string, Channel *>::const_iterator it = this->_joinedChannels.begin();
-	while (it != this->_joinedChannels.end())
-	{
-		channels.append("█              █              █                    █                                  █\n");
-		channels.append("█ " RESET + fillIt(it->first, 12));
-		channels.append(YELLOW " █      " RESET + fillIt(std::to_string(it->second->getOnlineUsers()), 7));
-		channels.append(YELLOW " █ " RESET + fillIt(it->second->getCreator()->getFullName(), 18));
-		channels.append(YELLOW " █ " RESET + fillIt(it->second->getTopic(), 32));
-		channels.append(YELLOW " █\n");
-		channels.append(YELLOW "█              █              █                    █                                  █\n");
-		channels.append("███████████████████████████████████████████████████████████████████████████████████████\n");
-		it++;
-	};
-	if (this->_joinedChannels.size() == 0)
-	{
-		channels.append("█                                                                                     █\n");
-		channels.append("█                                " RESET "YOU JOINED NO CHANNEL" YELLOW "                                █\n");
-		channels.append("█                                                                                     █\n");
-		channels.append("███████████████████████████████████████████████████████████████████████████████████████\n");
-	}
-	channels.append(RESET "\n\n");
-	return (channels);
-};
-
-std::string		Client::getUserPerfix() const { return (":" + this->_nickname + "!" + this->_username + "@" + this->_Host + " "); };
+std::string		Client::getUserPerfix() const { return (":" + this->_nickname + "!" + this->_username + "@" + SERVER_NAME + " "); };
 
 std::map<std::string, Channel *>	Client::getJoinedChannels() const { return (this->_joinedChannels); };
