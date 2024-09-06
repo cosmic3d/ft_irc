@@ -21,7 +21,11 @@ std::string Server::handlePass(const Request& req, int client_fd) {
     }
     _clients[client_fd]->setAuthenticated(true);
     print_debug("Client authenticated: " + itos(client_fd), colors::green, colors::bold);
-    return "";
+    // Establecer el hostname y enviar mensaje de bienvenida con formato RPL_WELCOME
+    std::vector<std::string> params;
+    params.push_back(_clients[client_fd]->getNickname());
+    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->formatPrefix());
+    return format_message(_name, RPL_WELCOME, params);
 }
 
 std::string Server::handleNick(const Request& req, int client_fd) {
@@ -49,13 +53,19 @@ std::string Server::handleNick(const Request& req, int client_fd) {
         return format_message(_name, ERR_ERRONEUSNICKNAME, params);
     }
     //Guardar el format message del anterior nickname para notificar al cliente el cambio de nickname
-    std::string acknoledgement = format_message(_clients[client_fd]->formatPrefix(), "NICK", req.params);
+    std::vector<std::string> params;
+    params.push_back(req.params[0]);
+    std::string acknoledgement = format_message(_clients[client_fd]->formatPrefix(), "NICK", params);
     // Establecer el nickname o cambiarlo
     _clients[client_fd]->setNickname(req.params[0]);
     if (_clients[client_fd]->isRegistered()) {
         return acknoledgement;
     }
-    return "";
+    // Establecer el hostname y enviar mensaje de bienvenida con formato RPL_WELCOME
+    params.clear();
+    params.push_back(_clients[client_fd]->getNickname());
+    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->formatPrefix());
+    return format_message(_name, RPL_WELCOME, params);
 }
 
 std::string Server::handleUser(const Request& req, int client_fd) {

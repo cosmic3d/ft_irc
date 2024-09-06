@@ -85,3 +85,6 @@ std::string Client::retrieveHostnameIp() const {
 std::string Client::formatPrefix() const {
     return getNickname() + "!" + getUsername() + "@" + getHostname();
 }
+
+std::string &Client::getReceiveBuffer() { return _receiveBuffer; }
+void Client::appendToReceiveBuffer(const std::string &data) { _receiveBuffer += data; }

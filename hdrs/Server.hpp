@@ -21,6 +21,7 @@
 #include <arpa/inet.h>
 #include <poll.h>
 #include <cstring>
+#include <cerrno>
 
 #define SERVER_NAME "LittleBigServer"
 #define PORT 8080
@@ -38,7 +39,6 @@ class Server {
         std::string             _password;
         std::vector<pollfd>     _pollFds; // monitored by the server for events using poll()
         std::map<int, Client*>            _clients; // TO-DO
-        std::vector<std::string>        _capabilitites;
         //std::map<std::string, Channel*>   _channels: // TO-DO
         
     public:

@@ -24,6 +24,7 @@ private:
     std::string _hostname;
     bool        _authenticated; //Password correct
     bool        _registered; //Nick, user, pass correct
+    std::string _receiveBuffer;
 
 public:
     Client(int socket);
@@ -43,6 +44,8 @@ public:
     bool    checkRegistered();
     std::string retrieveHostnameIp() const;
     std::string formatPrefix() const;
+    std::string &getReceiveBuffer();
+    void appendToReceiveBuffer(const std::string &data);
 };
 
 #endif

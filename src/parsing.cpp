@@ -67,10 +67,16 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     }
     print_debug("Handling command: " + req.command, colors::cyan, colors::bold);
     if (req.command == "PASS") {
-        return handlePass(req, client_fd);
-    } if (req.command == "NICK") {
-        return handleNick(req, client_fd);
-    } else if (req.command == "USER") {
+        std::string response = handlePass(req, client_fd);
+        bool checkRegistration = _clients[client_fd]->checkRegistered();
+        return checkRegistration ? response : "";
+    }
+    else  if (req.command == "NICK") {
+        std::string response = handleNick(req, client_fd);
+        bool checkRegistration = _clients[client_fd]->checkRegistered();
+        return checkRegistration ? response : "";
+    }
+    else if (req.command == "USER") {
         std::string response = handleUser(req, client_fd);
         bool checkRegistration = _clients[client_fd]->checkRegistered();
         return checkRegistration ? response : "";

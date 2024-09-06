@@ -17,8 +17,6 @@ Server::Server(const std::string &name, int port, const std::string &password) {
     this->_password = password;
     this->_serverSocket = -1;
     this->_name = name;
-    this->_capabilitites = std::vector<std::string>();
-    this->_capabilitites.push_back("invite-notify");
     print_debug("Server created", colors::green, colors::italic);
     print_debug("Server name: " + this->_name, colors::green, colors::reset);
 }
@@ -29,7 +27,11 @@ Server::~Server() {
         close(_serverSocket);
     }
 
-    // TO-DO: Clean up allocated Client/Channel objects
+    // Limpiar memoria de clientes
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+        delete it->second;
+    }
+    _clients.clear();
 }
 
 void    Server::start() {
@@ -125,6 +127,7 @@ void    Server::handleDisconnection(int clientSocket) {
             break;
         }
     }
+    //remove client from client list, freeing memory
     delete _clients[clientSocket];
     _clients.erase(clientSocket);
     return;
@@ -132,31 +135,53 @@ void    Server::handleDisconnection(int clientSocket) {
 
 
 
-void    Server::handleClient(int clientSocket) {
-    // Size follows IRC protocol max message length and is memory efficient
+void Server::handleClient(int clientSocket) {
     char buffer[512];
 
-    // Recieve data from client in a non-blocking way
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-    if (bytesRead <= 0)
+    // Recibir datos del cliente de forma no bloqueante
+    std::cout << "Receiving data from client" << std::endl;
+    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    if (bytesRead == 0) {
         handleDisconnection(clientSocket);
+        return;
+    }
+    else if (bytesRead < 0) {
+        //see value of errno and print error message
+        std::string error_msg = strerror(errno);
+        print_debug("Failed to receive data from client: " + error_msg, colors::red, colors::bold);
+        return;
+    }
 
-    buffer[bytesRead] = '\0';
-    std::string message(buffer);
-    print_debug("[" + itos(clientSocket) + "]", colors::cyan, colors::bold);
-    print_debug("CLIENT: " + message, colors::grey, colors::on_bright_cyan);
-    //split buffer using CR-LF as delimiter. without split function
-    std::vector<std::string> messages = ft_split(message, "\r\n");
+    buffer[bytesRead] = '\0'; // Asegura que el buffer es un string válido
+    std::string receivedData(buffer);
 
-    //parse, execute and send response for each message
-    for (size_t i = 0; i < messages.size(); i++) {
-        Request req = parse_request(messages[i]);
-        // req.print();
+    // Agregar los datos recibidos al buffer persistente del cliente
+    _clients[clientSocket]->appendToReceiveBuffer(receivedData);
+    print_debug("Received data from client: " + receivedData, colors::cyan, colors::bold);
+    print_debug("Client buffer: " + _clients[clientSocket]->getReceiveBuffer(), colors::bright_magenta, colors::bold);
+
+    // Obtener el buffer de recepción actual del cliente
+    std::string &clientBuffer = _clients[clientSocket]->getReceiveBuffer();
+
+    // Procesar comandos completos en el buffer
+    size_t pos;
+    while ((pos = clientBuffer.find("\r\n")) != std::string::npos) {
+        std::string command = clientBuffer.substr(0, pos);
+        clientBuffer.erase(0, pos + 2); // Eliminar comando del buffer
+
+        print_debug("[" + itos(clientSocket) + "]", colors::cyan, colors::bold);
+        print_debug("CLIENT: " + command, colors::grey, colors::on_bright_cyan);
+
+        Request req = parse_request(command);
         std::string response = execute_command(req, clientSocket);
-        if (response.empty()) {
-            continue;
+
+        if (!response.empty()) {
+            print_debug("SERVER: " + response, colors::cyan, colors::on_bright_grey);
+            if (send(clientSocket, response.c_str(), response.length(), 0) < 0) {
+                std::string error_msg = strerror(errno);
+                print_debug("Failed to send data to client: " + error_msg, colors::red, colors::bold);
+                return;
+            }
         }
-        print_debug("SERVER: " + response, colors::cyan, colors::on_bright_grey);
-        send(clientSocket, response.c_str(), response.length(), 0);
     }
 }
