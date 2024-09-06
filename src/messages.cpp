@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/05 14:20:24 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/06 13:34:50 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int Server::_sendmsg(int destfd, std::string message) {
     int bytesLeft = message.length();
     int b;
 
-    while (sent < (int)message.length) {
+    while (sent < (int)message.length()) {
         b = send(destfd, message.c_str() + sent, bytesLeft, 0);
         if (b == -1)
             break;
@@ -28,14 +28,14 @@ int Server::_sendmsg(int destfd, std::string message) {
 }
 
 std::string Server::_sendToAllUsers(Channel *channel, int senderFd, std::string message) {
-    std::map<int, Client *> allusers = channel->getAllUsers(); // TO-DO
+    std::map<int, Client *> allusers = channel->getAllUsers();
     std::map<int, Client *>::iterator it = allusers.begin();
-    std::string reply = this->_clients[senderFd]->getUserPerfix(); // TO-DO
+    std::string reply = this->_clients[senderFd]->getUserPerfix();
     reply.append(message);
     while (it != allusers.end()) {
         if (senderFd != it->first) {
             if (_sendmsg(it->first, reply) == -1) {
-				std::cout << "_sendall() error: " << strerror(errno) << std::endl;
+				std::cout << "_sendmsg() error: _sendToAllUsers" << std::endl;
 				return ("");
             }
         }
@@ -62,12 +62,13 @@ std::string Server::_privmsg(Request request, int i) {
 
 std::string Server::_privToUser(std::string User, std::string message, std::string cmd, int i) {
     int userFd = _findFdByNickName(User);
-    if (userFd == USERNOTFOUND)
+    if (userFd == USERNOTFOUND) {
         return (_printMessage("401", this->_clients[i]->getNickName(), User.append(" :No such nick")));
+    }   
 	std::string reply = this->_clients[i]->getUserPerfix();
 	reply.append(cmd + " " + User + " :" + message + "\n");
 	if (_sendmsg(userFd, reply) == -1)
-				std::cout << "_sendall() error: " << strerror(errno) << std::endl;
+				std::cout << "_sendmsg() error: _privToUser" << std::endl;
 	return ("");
 };
 

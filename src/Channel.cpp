@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/05 15:01:51 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/06 13:37:36 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,4 +64,95 @@ std::pair<Client *, int> Channel::findUserRole( int i )
 	if (it != this->_voice.end())
 		return (std::pair<Client *, int>(it->second, 2));
 	return (std::pair<Client *, int>(NULL, -1));
+};
+
+int	Channel::addMember( Client *member )
+{
+	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickName()) != this->_banned.end())
+		return (BANNEDFROMCHAN);
+	if (this->_members.find(member->getClientfd()) == this->_members.end())
+	{
+		this->_members.insert(std::pair<int, Client *>(member->getClientfd(), member));
+		this->_onlineUsers++;
+		return (USERISJOINED);
+	};
+	return (-1);
+};
+
+int	Channel::addOperator( Client *member )
+{
+	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickName()) != this->_banned.end())
+		return (BANNEDFROMCHAN);
+	if (this->_operators.find(member->getClientfd()) == this->_operators.end())
+	{
+		this->_operators.insert(std::pair<int, Client *>(member->getClientfd(), member));
+		this->_onlineUsers++;
+		return (USERISJOINED);
+	};
+	return (-1);
+};
+
+int	Channel::banUser( Client *member )
+{
+	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickName()) != this->_banned.end())
+		return (BANNEDFROMCHAN);
+	this->_banned.push_back(member->getNickName());
+	return (USERISBANNED);
+};
+
+void	Channel::removeOperator( int i)
+{
+	this->_operators.erase(i);
+	this->_onlineUsers--;
+};
+
+void	Channel::removeVoice( int i)
+{
+	this->_voice.erase(i);
+	this->_onlineUsers--;
+};
+
+void	Channel::removeBanned( std::string NickName )
+{
+	if (std::find(this->_banned.begin(), this->_banned.end(), NickName) != this->_banned.end())
+		return ;
+	this->_banned.erase(std::find(this->_banned.begin(), this->_banned.end(), NickName));
+};
+
+void	Channel::removeMember( int i)
+{
+	this->_members.erase(i);
+	this->_onlineUsers--;
+};
+
+std::string		Channel::listAllUsers() const
+{
+	std::string		AllUsers(":");
+	std::map<int, Client *>::const_iterator it = this->_operators.begin();
+	while (it != this->_operators.end())
+	{
+		AllUsers.append("@" + it->second->getNickName() + " ");
+		it++;
+	}
+	it = this->_members.begin();
+	while (it != this->_members.end())
+	{
+		AllUsers.append(it->second->getNickName() + " ");
+		it++;
+	}
+	it = this->_voice.begin();
+	while (it != this->_voice.end())
+	{
+		AllUsers.append("+" + it->second->getNickName() + " ");
+		it++;
+	}
+	return (AllUsers);
+};
+
+std::map<int, Client *>	Channel::getAllUsers() const
+{
+	std::map<int, Client *>	allUsers(this->_members.begin(), this->_members.end());
+	allUsers.insert(this->_operators.begin(), this->_operators.end());
+	allUsers.insert(this->_voice.begin(), this->_voice.end());
+	return (allUsers);
 };

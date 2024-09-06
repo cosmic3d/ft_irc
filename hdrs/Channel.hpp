@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:52:45 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/05 15:08:31 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/06 13:36:50 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,14 +58,15 @@ class Channel
         ~Channel();
 
    	public: /*             Getters                         */
-        const char        &getPrefix() const;
-        const int         &getOnlineUsers() const; 
-        const std::string &getName() const;
-        const std::string &getKey() const;
-        const std::string &getTopic() const;
-        const std::map<int, Client *> &getMembers() const;
-        const std::map<int, Client *> &getOperators() const;
-        const std::map<int, Client *> &getVoice() const;
+        const char                      &getPrefix() const;
+        const int                       &getOnlineUsers() const; 
+        const std::string               &getName() const;
+        const std::string               &getKey() const;
+        const std::string               &getTopic() const;
+        std::map<int, Client *>         getAllUsers() const;
+        const std::map<int, Client *>   &getMembers() const;
+        const std::map<int, Client *>   &getOperators() const;
+        const std::map<int, Client *>   &getVoice() const;
         Client*                         getCreator() const;
         
     public: // modifiers
@@ -87,6 +88,7 @@ class Channel
 
     public:
         std::pair<Client *, int>    findUserRole( int i );
+        std::string                 listAllUsers() const;
 };
 
 #endif
