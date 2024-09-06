@@ -42,7 +42,7 @@ std::string Server::handleNick(const Request& req, int client_fd) {
         }
     }
     // Verificar si el nickname es válido
-    if (req.params[0].length() > 9) {
+    if (req.params[0].length() > 9 || !isAlphaNumeric(req.params[0])) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("Erroneous nickname");
@@ -67,7 +67,7 @@ std::string Server::handleUser(const Request& req, int client_fd) {
         return format_message(_name, ERR_ALREADYREGISTRED, params);
     }
     // Verificar si el usuario ha dado todos los parámetros
-    if (req.params.size() < 4) {
+    if (req.params.size() < 4  || !isAlphaNumeric(req.params[0])) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("Not enough parameters");
@@ -78,7 +78,7 @@ std::string Server::handleUser(const Request& req, int client_fd) {
     // Establecer el hostname y enviar mensaje de bienvenida con formato RPL_WELCOME
     std::vector<std::string> params;
     params.push_back(_clients[client_fd]->getNickname());
-    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->getNickname() + "!" + _clients[client_fd]->getUsername() + "@" + _clients[client_fd]->getHostname());
+    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->formatPrefix());
     return format_message(_name, RPL_WELCOME, params);
 }
 

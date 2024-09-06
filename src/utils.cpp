@@ -35,6 +35,12 @@ std::vector<std::string> ft_split(std::string &str, std::string delim) {
     result.push_back(str);
     return result;
 }
-// std::vector<std::string> list_to_vector(std::initializer_list<std::string> list){
-// 		return std::vector<std::string>(list);
-// }
+
+bool isAlphaNumeric(const std::string &str) {
+    for (size_t i = 0; i < str.length(); i++) {
+        if (!std::isalnum(str[i])) {
+            return false;
+        }
+    }
+    return true;
+}
