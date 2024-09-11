@@ -50,7 +50,7 @@ Request parse_request(const std::string& buffer) {
             std::string trailing_param;
             std::getline(stream, trailing_param);
             trailing_param = token.substr(1) + (trailing_param.empty() ? "" : " " + trailing_param);
-            params.push_back(trailing_param.substr(0, trailing_param.length() - 2));  // Remove the trailing \r\n
+            params.push_back(trailing_param.substr(0, trailing_param.length()));  // Remove the trailing \r\n
             break;
         } else {
             params.push_back(token);
