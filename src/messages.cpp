@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 19:19:41 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/12 16:42:45 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int Server::_sendmsg(int destfd, std::string message) {
 
     print_debug("SERVER (sending): " + message, colors::cyan, colors::on_bright_grey);
     while (sent < (int)message.length()) {
-        b = send(destfd, message.c_str() + sent, bytesLeft, 0);
+        b = send(destfd, message.c_str() + sent, bytesLeft, MSG_DONTWAIT);
         if (b == -1)
             break;
         sent += b;

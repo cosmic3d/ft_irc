@@ -140,7 +140,7 @@ void Server::_handleClient(int clientSocket) {
 
     // Recibir datos del cliente de forma no bloqueante
     std::cout << "Receiving data from client" << std::endl;
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
     if (bytesRead == 0) {
         _handleDisconnection(clientSocket);
         return;
@@ -177,7 +177,7 @@ void Server::_handleClient(int clientSocket) {
 
         if (!response.empty()) {
             print_debug("SERVER: " + response, colors::cyan, colors::on_bright_grey);
-            if (send(clientSocket, response.c_str(), response.length(), 0) < 0) {
+            if (_sendmsg(clientSocket, response.c_str()) < 0) {
                 std::string error_msg = strerror(errno);
                 print_debug("Failed to send data to client: " + error_msg, colors::red, colors::bold);
                 return;

@@ -110,7 +110,7 @@ std::string Server::_handleUser(const Request& req, int client_fd) {
 std::string Server::_handleQuit(const Request& req, int client_fd) {
     //Enviar al usuario un reconocimiento de que se ha desconectado
     std::string server_response = format_message(_clients[client_fd]->formatPrefix(), "QUIT", req.params);
-    send(client_fd, server_response.c_str(), server_response.length(), 0);
+    _sendmsg(client_fd, server_response.c_str());
     // Desconectar al cliente
     _handleDisconnection(client_fd);
     return "";
