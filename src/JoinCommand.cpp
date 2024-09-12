@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   JoinCommand.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/26 16:20:18 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 19:20:10 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/12 18:00:44 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		std::vector<std::string> params;
 		params.push_back(ChannelName);
 		
-		std::string acknoledgement = format_message(_clients[CreatorFd]->formatPrefix(), "JOIN", params);
+		std::string acknoledgement = format_message(_clients[CreatorFd]->mask(), "JOIN", params);
 		_sendToAllUsers(channel, CreatorFd, acknoledgement);
 		_sendmsg(CreatorFd, acknoledgement);
 	}    
@@ -126,7 +126,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 				return (USERALREADYJOINED);
 			else if (i == BANNEDFROMCHAN)
 				return (BANNEDFROMCHAN);
-			_sendmsg(CreatorFd, this->_clients[CreatorFd]->formatPrefix() + "JOIN " + ChannelName + "\n");
+			_sendmsg(CreatorFd, this->_clients[CreatorFd]->mask() + "JOIN " + ChannelName + "\n");
 			
 			std::vector<std::string> params;
     		params.push_back(this->_clients[CreatorFd]->getNickname());
@@ -188,7 +188,7 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 				return (USERALREADYJOINED);
 			else if (i == BANNEDFROMCHAN)
 				return (BANNEDFROMCHAN);
-			_sendmsg(CreatorFd, this->_clients[CreatorFd]->formatPrefix() + "JOIN " + ChannelName + "\n");
+			_sendmsg(CreatorFd, this->_clients[CreatorFd]->mask() + "JOIN " + ChannelName + "\n");
 			std::vector<std::string> params;
     		params.push_back(this->_clients[CreatorFd]->getNickname());
     		params.push_back(ChannelName);

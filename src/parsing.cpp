@@ -84,7 +84,7 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     else if (req.command == "QUIT") {
         return _handleQuit(req, client_fd);
     }
-        // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
+    // SI NO ESTÁ AUTENTICADO NO PODRÁ EJECUTAR LOS SIGUIENTES COMANDOS
     if (_clients[client_fd]->getRegistered() == false) {
         //pass a vector list of parameters to the format_message function {"You have not registered"} DOES NOT WORK
         std::vector<std::string> params;

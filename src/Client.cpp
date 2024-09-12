@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:43:13 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 19:25:39 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/12 18:55:18 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(): _clientfd(0), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _isOperator(false), _joinedChannels() {};
-Client::Client( int fd ): _clientfd(fd), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _isOperator(false), _joinedChannels() {};
+Client::Client(): _clientfd(0), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _joinedChannels() {};
+Client::Client( int fd ): _clientfd(fd), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _joinedChannels() {};
 Client::Client( const Client& x ) { *this = x; };
 
 
@@ -23,7 +23,6 @@ Client & Client::operator=( const Client& rhs )
 		return (*this);
 	this->_clientfd = rhs._clientfd;
 	this->_registered = rhs._registered;
-	this->_isOperator = rhs._isOperator;
 	this->_nickname = rhs._nickname;
 	this->_username = rhs._username;
 	this->_hostname = retrieveHostnameIp();
@@ -35,12 +34,11 @@ Client & Client::operator=( const Client& rhs )
 Client::~Client() {};
 
 std::string	Client::getUsername()		const { return (this->_username); };
-std::string	Client::getNickname()		const { return (this->_nickname); };
+std::string	Client::getNickname()		const { return (this->_nickname.empty() ? "*" : this->_nickname); };
 std::string	Client::getHostname()		const { return  (this->_hostname); };
 bool		Client::getAuth()			const { return (this->_authenticated); };
 int			Client::getClientfd()		const { return (this->_clientfd); };
 int			Client::getRegistered()		const { return (this->_registered); };
-int			Client::getOperator()		const { return (this->_isOperator); };
 std::string &Client::getReceiveBuffer() { return _receiveBuffer; };
 void Client::appendToReceiveBuffer(const std::string &data) { _receiveBuffer += data; };
 
@@ -69,27 +67,6 @@ void		Client::setNickname( std::string nickname )	{ this->_nickname = nickname; 
 void		Client::setClientfd( int Clientfd )			{ this->_clientfd = Clientfd; };
 void		Client::setRegistered( int Registered )		{ this->_registered = Registered; };
 void		Client::setAuth( int Auth )					{ this->_authenticated = Auth; };
-void		Client::setIsOperator(int isOperator)
-{
-	this->_isOperator = isOperator;
-	//this->_modes.op = isOperator;
-	//this->_modes.localOp = isOperator;
-};
-// void		Client::setMode(int value, char mode)
-// {
-// 	if (mode == 'i')
-// 		this->_modes.invisible = value;
-// 	else if (mode == 'w')
-// 		this->_modes.wallops = value;
-// 	else if (mode == 'r' && value == 1)
-// 		this->_modes.restricted = value;
-// 	else if (mode == 'o' && value == 0)
-// 		this->_modes.op = value;
-// 	else if (mode == 'O' && value == 0)
-// 		this->_modes.localOp = value;
-// 	else if (mode == 's')
-// 		this->_modes.server = value;
-// };
 
 int		Client::isJoined( std::string ChannelName ) const
 {
@@ -132,10 +109,8 @@ std::string	Client::leaveAllChannels()
 		std::pair<Client *, int> user(it->second->findUserRole(this->_clientfd)); // TO-DO
 		if (user.second == 0)
 			it->second->removeMember(this->_clientfd);
-		else if (user.second == 1)
-			it->second->removeOperator(this->_clientfd);
 		else
-			it->second->removeVoice(this->_clientfd);
+			it->second->removeOperator(this->_clientfd);
 		user.first->leaveChannel(it->second->getName());
 		it = this->_joinedChannels.begin();
 	}
@@ -153,7 +128,7 @@ std::string	Client::getUserInfo() const
 	return (userInfo);
 };
 
-std::string Client::formatPrefix() const {
+std::string Client::mask() const {
     return getNickname() + "!" + getUsername() + "@" + getHostname();
 }
 

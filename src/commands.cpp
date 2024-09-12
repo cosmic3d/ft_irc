@@ -39,7 +39,7 @@ std::string Server::_handlePass(const Request& req, int client_fd) {
     // Establecer el hostname y enviar mensaje de bienvenida con formato RPL_WELCOME
     std::vector<std::string> params;
     params.push_back(_clients[client_fd]->getNickname());
-    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->formatPrefix());
+    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->mask());
     return format_message(_name, RPL_WELCOME, params);
 }
 
@@ -70,7 +70,7 @@ std::string Server::_handleNick(const Request& req, int client_fd) {
     //Guardar el format message del anterior nickname para notificar al cliente el cambio de nickname
     std::vector<std::string> params;
     params.push_back(req.params[0]);
-    std::string acknoledgement = format_message(_clients[client_fd]->formatPrefix(), "NICK", params);
+    std::string acknoledgement = format_message(_clients[client_fd]->mask(), "NICK", params);
     // Establecer el nickname o cambiarlo
     _clients[client_fd]->setNickname(req.params[0]);
     if (_clients[client_fd]->getRegistered()) {
@@ -79,7 +79,7 @@ std::string Server::_handleNick(const Request& req, int client_fd) {
     // Establecer el hostname y enviar mensaje de bienvenida con formato RPL_WELCOME
     params.clear();
     params.push_back(_clients[client_fd]->getNickname());
-    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->formatPrefix());
+    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->mask());
     return format_message(_name, RPL_WELCOME, params);
 }
 
@@ -103,13 +103,13 @@ std::string Server::_handleUser(const Request& req, int client_fd) {
     // Establecer el hostname y enviar mensaje de bienvenida con formato RPL_WELCOME
     std::vector<std::string> params;
     params.push_back(_clients[client_fd]->getNickname());
-    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->formatPrefix());
+    params.push_back("Welcome to " + _name + " " + _clients[client_fd]->mask());
     return format_message(_name, RPL_WELCOME, params);
 }
 
 std::string Server::_handleQuit(const Request& req, int client_fd) {
     //Enviar al usuario un reconocimiento de que se ha desconectado
-    std::string server_response = format_message(_clients[client_fd]->formatPrefix(), "QUIT", req.params);
+    std::string server_response = format_message(_clients[client_fd]->mask(), "QUIT", req.params);
     send(client_fd, server_response.c_str(), server_response.length(), 0);
     // Desconectar al cliente
     _handleDisconnection(client_fd);

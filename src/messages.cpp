@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   messages.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 19:19:41 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/12 18:33:27 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int Server::_sendmsg(int destfd, std::string message) {
 std::string Server::_sendToAllUsers(Channel *channel, int senderFd, std::string message) {
     std::map<int, Client *> allusers = channel->getAllUsers();
     std::map<int, Client *>::iterator it = allusers.begin();
-    std::string reply = this->_clients[senderFd]->formatPrefix();
+    std::string reply = this->_clients[senderFd]->mask();
     reply.append(message);
     while (it != allusers.end()) {
         if (senderFd != it->first) {
@@ -46,12 +46,6 @@ std::string Server::_sendToAllUsers(Channel *channel, int senderFd, std::string 
 };
 
 std::string Server::_privmsg(Request request, int i) {
-    if (!this->_clients[i]->getRegistered()) {
-        std::vector<std::string> params;
-        params.push_back(this->_clients[i]->getNickname());
-        params.push_back("You have not registered");
-        return format_message(_name, ERR_NOTREGISTERED, params);
-    }
     if (request.params.size() < 2) {
         std::vector<std::string> params;
         params.push_back(this->_clients[i]->getNickname());
@@ -80,9 +74,9 @@ std::string Server::_privToUser(std::string User, std::string message, std::stri
         params.push_back(this->_clients[i]->getNickname());
         params.push_back(User.append(" :No such nick"));
         return format_message(_name, ERR_NOSUCHNICK, params); 
-    }   
-	std::string reply = this->_clients[i]->formatPrefix();
-	reply.append(cmd + " " + User + " :" + message + "\n");
+    }
+	std::string reply = this->_clients[i]->mask();
+	reply.append(cmd + " " + User + " :" + message + "\r\n");
 	if (_sendmsg(userFd, reply) == -1)
 				std::cout << "_sendmsg() error: _privToUser" << std::endl;
 	return ("");

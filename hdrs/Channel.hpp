@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 08:52:45 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 13:36:50 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/12 18:39:49 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,7 @@ class Channel
             means that they are allowed to speak when the channel mode +m is set. +m
             sets moderated mode which means that regular users may not speak.
         */ 
-        std::map<int, Client *> _voice;
-        std::vector<std::string>    _banned;
+        std::vector<std::string>    _banned; //Hay que mirar que el formato de los baneos sea correcto (En el protocolo IRC se banea por máscara, como en el invite-only)
 
     public:
         Channel();
