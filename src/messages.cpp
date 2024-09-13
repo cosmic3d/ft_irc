@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/12 16:42:45 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/13 16:26:55 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ int Server::_sendmsg(int destfd, std::string message) {
 
 std::string Server::_sendToAllUsers(Channel *channel, int senderFd, std::string message) {
     std::map<int, Client *> allusers = channel->getAllUsers();
+    std::cout << "Number of users in the channel: " << allusers.size() << std::endl;
     std::map<int, Client *>::iterator it = allusers.begin();
     std::string reply = this->_clients[senderFd]->formatPrefix();
     reply.append(message);
@@ -90,8 +91,8 @@ std::string Server::_privToUser(std::string User, std::string message, std::stri
 
 std::string 	Server::_privToChannel(std::string ChannelName, std::string message, std::string cmd, int i)
 {
-	std::map<std::string, Channel *>::iterator it = this->_allChannels.find(ChannelName);
-	if (it != this->_allChannels.end())
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
+	if (it != this->_channels.end())
 	{
 		std::pair<Client *, int> user = it->second->findUserRole(i);
 		if (user.second == -1 ) {

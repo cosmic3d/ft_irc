@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 19:06:19 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/13 16:27:08 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ class Server {
         std::vector<pollfd>     _pollFds; // monitored by the server for events using poll()
         std::map<int, Client*>            _clients; // TO-DO
         std::map<std::string, Channel*>   _channels; // TO-DO
-        std::map<std::string, Channel *>    _allChannels;
 
     private:
         std::string                 _joinChannel(Request request, int client_fd);

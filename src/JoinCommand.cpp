@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/26 16:20:18 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/06 19:20:10 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/13 16:26:55 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,9 +100,9 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		if (ChannelName[0] != '&' && ChannelName[0] != '#' && ChannelName[0] != '+' && ChannelName[0] != '!')
 			return (BADCHANMASK);
 		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]);
-		this->_allChannels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
+		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
 		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
-
+		//print_debug(channel->getOperators, colors::blue, colors::on_bright_magenta);
 		std::vector<std::string> params;
 		params.push_back(ChannelName);
 		
@@ -116,10 +116,12 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		if (it->second->getKey().empty())
 		{
 			int i = 0;
-			if (this->_clients[CreatorFd]->getOperator() == true)
-				i = it->second->addOperator(this->_clients[CreatorFd]); // TO-DO
-			else
-				i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
+			//if (this->_clients[CreatorFd]->getOperator() == true)
+				//i = it->second->addOperator(this->_clients[CreatorFd]); // TO-DO
+			//else
+			i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
+			std::map<int, Client *> allusers = it->second->getAllUsers();
+    		std::cout << "Number of users in the channel after adding new member to channel: " << allusers.size() << std::endl;
 			if (i == USERISJOINED)
 				this->_clients[CreatorFd]->joinChannel( it->first, it->second ); // TO-DO
 			else if (i == USERALREADYJOINED)
@@ -161,7 +163,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 }
 
 int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd) {
-	std::map<std::string, Channel *>::iterator it = this->_allChannels.find(ChannelName);
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
 
     // If channel doesnt exist, create it
     if (it == this->_channels.end())
@@ -169,7 +171,7 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 		if (ChannelName[0] != '&' && ChannelName[0] != '#' && ChannelName[0] != '+' && ChannelName[0] != '!')
 			return (BADCHANMASK);	
 		Channel *channel = new Channel(ChannelName, ChannelKey, this->_clients[CreatorFd]);
-		this->_allChannels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
+		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
 		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
 	}    
     // Else join client to already existing channel checking channelkey
