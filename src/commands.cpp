@@ -60,8 +60,8 @@ std::string Server::_handleNick(const Request& req, int client_fd) {
             return format_message(_name, ERR_NICKNAMEINUSE, params);
         }
     }
-    // Verificar si el nickname es válido
-    if (req.params[0].length() > 9 || !isAlphaNumeric(req.params[0])) {
+    // Verificar si el nickname es válido (que tampoco contenga ! ni @)
+    if (req.params[0].length() > 9 || !isAlphaNumeric(req.params[0] || req.params[0].find("!") != std::string::npos || req.params[0].find("@") != std::string::npos)) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("Erroneous nickname");
@@ -92,7 +92,7 @@ std::string Server::_handleUser(const Request& req, int client_fd) {
         return format_message(_name, ERR_ALREADYREGISTRED, params);
     }
     // Verificar si el usuario ha dado todos los parámetros
-    if (req.params.size() < 4  || !isAlphaNumeric(req.params[0])) {
+    if (req.params.size() < 4  || !isAlphaNumeric(req.params[0]) || req.params[0].find("!") != std::string::npos || req.params[0].find("@") != std::string::npos || req.params[0].find("*") != std::string::npos || req.params[0].find("?") != std::string::npos) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("Not enough parameters");
