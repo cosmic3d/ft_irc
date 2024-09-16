@@ -98,8 +98,8 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         std::cout << "Responding to PING" << std::endl;
         return ""; // TO_DO
         // Aquí se respondería con PONG al cliente
-    } else if (req.command == "OPER") {
-        return (_handleOperator(req, client_fd));
+    } else if (req.command == "MODE") {
+        return (_handleMode(req, client_fd)); // TO_DO
     } else if (req.command == "JOIN") {
         // Manejar el comando JOIN
         std::cout << "Handling JOIN" << std::endl;

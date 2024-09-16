@@ -84,11 +84,10 @@ std::string Server::_privToUser(std::string User, std::string message, std::stri
 
 std::string 	Server::_privToChannel(std::string ChannelName, std::string message, std::string cmd, int i)
 {
-	std::map<std::string, Channel *>::iterator it = this->_allChannels.find(ChannelName);
-	if (it != this->_allChannels.end())
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
+	if (it != this->_channels.end())
 	{
-		std::pair<Client *, int> user = it->second->findUserRole(i);
-		if (user.second == -1 ) {
+		if (this->_clients[i]->isJoined(ChannelName) == 0) {
             std::vector<std::string> params;
             params.push_back(this->_clients[i]->getNickname());
             params.push_back(ChannelName.append(" :Cannot send to channel"));

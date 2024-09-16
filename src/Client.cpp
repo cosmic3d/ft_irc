@@ -98,7 +98,7 @@ std::string	Client::joinedChannels() const
 
 void	Client::leaveChannel( std::string ChannelName )
 {
-	this->_joinedChannels.erase(ChannelName);
+	this->_joinedChannels.erase(ChannelName); //Porqué necesitamos joinedChannels() si ya tenemos el nombre del canal y podemos acceder directamente a él?
 };
 
 std::string	Client::leaveAllChannels()
@@ -106,12 +106,11 @@ std::string	Client::leaveAllChannels()
 	std::map<std::string, Channel *>::iterator it = this->_joinedChannels.begin();
 	while( it != this->_joinedChannels.end())
 	{
-		std::pair<Client *, int> user(it->second->findUserRole(this->_clientfd)); // TO-DO
-		if (user.second == 0)
-			it->second->removeMember(this->_clientfd);
+		if (it->second->isOperator(this->getClientfd()))
+			it->second->removeOperator(this->getClientfd());
 		else
-			it->second->removeOperator(this->_clientfd);
-		user.first->leaveChannel(it->second->getName());
+			it->second->removeMember(this->getClientfd());
+		this->leaveChannel(it->first);
 		it = this->_joinedChannels.begin();
 	}
 	return ("");

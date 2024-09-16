@@ -23,6 +23,7 @@
 #define NOSUCHCHANNEL 7
 #define USERISBANNED 8
 #define BADCHANMASK 9
+#define NOTINVITED 10
 #define USERNOTINCHANNEL -1
 #define USERNOTFOUND -1
 
@@ -36,17 +37,18 @@ class Channel
         char                    _prefix;
         Client*                 _creator;
         int                     _onlineUsers;
+        int                     _userLimit;
         std::string             _name;
         std::string				_key;
         std::string             _topic;
         std::map<int, Client *> _members;
         std::map<int, Client *> _operators;
-        /*  
-         *  Users with a plus sign (+) next to their nickname are voiced users. That
-            means that they are allowed to speak when the channel mode +m is set. +m
-            sets moderated mode which means that regular users may not speak.
-        */ 
-        std::vector<std::string>    _banned; //Hay que mirar que el formato de los baneos sea correcto (En el protocolo IRC se banea por máscara, como en el invite-only)
+        std::vector<std::string>    _banList; //Lista de personas explícitamente baneadas
+        std::vector<std::string>   _inviteList; //Lista de personas explícitamente invitadas
+        std::vector<std::string>   _banMasks; //Lista de máscaras de baneo
+        std::vector<std::string>   _inviteMasks; //Lista de máscaras de invitación
+        bool                        _inviteOnly;
+        bool                        _topicRestricted;
 
     public:
         Channel();
@@ -86,8 +88,11 @@ class Channel
         void    setOnlineUsers(int online);
 
     public:
-        std::pair<Client *, int>    findUserRole( int i );
+        bool	isOperator( int i ) const;
+        bool	isMember( int i ) const;
         std::string                 listAllUsers() const;
+        bool matchMask(const std::string& mask, const std::string& address) const;
+        bool matchMaskList(const std::vector<std::string>& maskList, const std::string& address) const;
 };
 
 #endif

@@ -12,11 +12,11 @@
 
 #include "Channel.hpp"
 
-Channel::Channel(std::string channelName, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _name(channelName), _key(), _topic(), _members(), _operators(), _banned()
+Channel::Channel(std::string channelName, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _userLimit(0), _name(channelName), _key(), _topic(), _members(), _operators(), _banList(), _inviteList(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
 {
 	this->_operators.insert(std::pair<int, Client *>(Creator->getClientfd(), Creator));
 };
-Channel::Channel(std::string channelName, std::string channelKey, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _name(channelName), _key(channelKey), _topic(), _members(), _operators(), _banned()
+Channel::Channel(std::string channelName, std::string channelKey, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _userLimit(0), _name(channelName), _key(channelKey), _topic(), _members(), _operators(), _banList(), _inviteList(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
 {
 	this->_operators.insert(std::pair<int, Client *>(Creator->getClientfd(), Creator));
 };
@@ -29,9 +29,19 @@ Channel& Channel::operator=( const Channel& rhs )
 		return (*this);
 	this->_prefix = rhs._prefix;
 	this->_onlineUsers = rhs._onlineUsers;
+	this->_userLimit = rhs._userLimit;
 	this->_name = rhs._name;
-	this->_members.insert(rhs._members.begin(), rhs._members.end());
-	this->_operators.insert(rhs._operators.begin(), rhs._operators.end());
+	//insert some other way
+	this->_key = rhs._key;
+	this->_topic = rhs._topic;
+	this->_members = rhs._members;
+	this->_operators = rhs._operators;
+	this->_banList = rhs._banList;
+	this->_inviteList = rhs._inviteList;
+	this->_banMasks = rhs._banMasks;
+	this->_inviteMasks = rhs._inviteMasks;
+	this->_inviteOnly = rhs._inviteOnly;
+	this->_topicRestricted = rhs._topicRestricted;
 	return (*this);
 };
 
@@ -50,22 +60,41 @@ void	Channel::setName(std::string name)		{ this->_name = name; };
 void	Channel::setKey(std::string key)		{ this->_key = key; };
 void	Channel::setTopic(std::string topic)	{ this->_topic = topic; };
 
-std::pair<Client *, int> Channel::findUserRole( int i ) //Esto no funciona correctamente. Un usuario puede ser miembro y operador a la vez
+bool	Channel::isOperator( int i ) const
 {
-	std::map<int, Client *>::iterator it = this->_members.find(i);
-	if (it != this->_members.end())
-		return (std::pair<Client *, int>(it->second, 0));
-	it = this->_operators.find(i);
-	if (it != this->_operators.end())
-		return (std::pair<Client *, int>(it->second, 1));
-	return (std::pair<Client *, int>(NULL, -1));
+	if (this->_operators.find(i) != this->_operators.end())
+		return (true);
+	return (false);
+};
+
+bool	Channel::isMember( int i ) const
+{
+	if (this->_members.find(i) != this->_members.end())
+		return (true);
+	return (false);
 };
 
 int	Channel::addMember( Client *member )
 {
-	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickname()) != this->_banned.end())
+	if (std::find(this->_banList.begin(), this->_banList.end(), member->getNickname()) != this->_banList.end()) //Está banneado explícitamente
 		return (BANNEDFROMCHAN);
-	if (this->_members.find(member->getClientfd()) == this->_members.end())
+
+	if (this->_banMasks.size() > 0 && matchMaskList(this->_banMasks, member->mask())) { //Está banneado por máscara
+		return (BANNEDFROMCHAN);
+	}
+
+	if (this->_inviteOnly)
+	{
+		if (matchMaskList(this->_inviteMasks, member->mask()) == false) { //No está invitado por máscara
+			if (std::find(this->_inviteList.begin(), this->_inviteList.end(), member->getNickname()) == this->_inviteList.end()) //No está invitado explícitamente
+				return (NOTINVITED);
+		}
+	}
+
+	if (this->_userLimit > 0 && this->_onlineUsers >= this->_userLimit) //Está lleno
+		return (CHANNELISFULL);
+	
+	if (this->_members.find(member->getClientfd()) == this->_members.end() && this->_operators.find(member->getClientfd()) == this->_operators.end())
 	{
 		this->_members.insert(std::pair<int, Client *>(member->getClientfd(), member));
 		this->_onlineUsers++;
@@ -76,12 +105,11 @@ int	Channel::addMember( Client *member )
 
 int	Channel::addOperator( Client *member )
 {
-	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickname()) != this->_banned.end())
-		return (BANNEDFROMCHAN);
-	if (this->_operators.find(member->getClientfd()) == this->_operators.end())
+	if (!this->isOperator(member->getClientfd()) && this->isMember(member->getClientfd()))
 	{
 		this->_operators.insert(std::pair<int, Client *>(member->getClientfd(), member));
 		this->_onlineUsers++;
+		this->_members.erase(member->getClientfd());
 		return (USERISJOINED);
 	};
 	return (-1);
@@ -89,9 +117,9 @@ int	Channel::addOperator( Client *member )
 
 int	Channel::banUser( Client *member )
 {
-	if (std::find(this->_banned.begin(), this->_banned.end(), member->getNickname()) != this->_banned.end())
+	if (std::find(this->_banList.begin(), this->_banList.end(), member->getNickname()) != this->_banList.end())
 		return (BANNEDFROMCHAN);
-	this->_banned.push_back(member->getNickname());
+	this->_banList.push_back(member->getNickname());
 	return (USERISBANNED);
 };
 
@@ -103,9 +131,9 @@ void	Channel::removeOperator( int i)
 
 void	Channel::removeBanned( std::string NickName )
 {
-	if (std::find(this->_banned.begin(), this->_banned.end(), NickName) != this->_banned.end())
+	if (std::find(this->_banList.begin(), this->_banList.end(), NickName) != this->_banList.end())
 		return ;
-	this->_banned.erase(std::find(this->_banned.begin(), this->_banned.end(), NickName));
+	this->_banList.erase(std::find(this->_banList.begin(), this->_banList.end(), NickName));
 };
 
 void	Channel::removeMember( int i)
@@ -138,3 +166,54 @@ std::map<int, Client *>	Channel::getAllUsers() const
 	allUsers.insert(this->_operators.begin(), this->_operators.end());
 	return (allUsers);
 };
+
+// Función auxiliar para verificar si una máscara coincide con la dirección
+bool Channel::matchMask(const std::string& mask, const std::string& address) const{
+		// Comprobación de errores: si la máscara o la dirección están vacías
+		if (mask.empty() || address.empty()) {
+				print_debug("Error: mask or address is empty", colors::red, colors::bold);
+				return false;
+		}
+
+		int m = mask.length();
+		int n = address.length();
+
+		// Creamos una matriz para almacenar los resultados de subproblemas
+		std::vector<std::vector<bool> > dp(m + 1, std::vector<bool>(n + 1, false));
+
+		// La máscara vacía coincide solo con la cadena vacía
+		dp[0][0] = true;
+
+		// Si la máscara comienza con '*', puede coincidir con una cadena vacía
+		for (int i = 1; i <= m; i++) {
+				if (mask[i - 1] == '*') {
+						dp[i][0] = dp[i - 1][0];
+				}
+		}
+
+		// Comenzamos a rellenar la matriz para las demás combinaciones
+		for (int i = 1; i <= m; i++) {
+				for (int j = 1; j <= n; j++) {
+						// Si el carácter actual de la máscara es '?', o coincide con el de la dirección
+						if (mask[i - 1] == '?' || mask[i - 1] == address[j - 1]) {
+								dp[i][j] = dp[i - 1][j - 1];
+						}
+						// Si el carácter actual de la máscara es '*', puede coincidir con cualquier secuencia de caracteres
+						else if (mask[i - 1] == '*') {
+								dp[i][j] = dp[i - 1][j] || dp[i][j - 1];
+						}
+				}
+		}
+
+		return dp[m][n];
+}
+
+bool Channel::matchMaskList(const std::vector<std::string>& maskList, const std::string& address) const {
+		//for in a c++98 manner
+		for (std::vector<std::string>::const_iterator it = maskList.begin(); it != maskList.end(); ++it) {
+				if (matchMask(*it, address)) {
+						return true;
+				}
+		}
+		return false;
+}

@@ -41,9 +41,8 @@ class Server {
         int                     _port; // port number (identifies processes)
         std::string             _password;
         std::vector<pollfd>     _pollFds; // monitored by the server for events using poll()
-        std::map<int, Client*>            _clients; // TO-DO
-        std::map<std::string, Channel*>   _channels; // TO-DO
-        std::map<std::string, Channel *>    _allChannels;
+        std::map<int, Client*>            _clients;
+        std::map<std::string, Channel *>    _channels;
 
     private:
         std::string                 _joinChannel(Request request, int client_fd);
@@ -57,7 +56,7 @@ class Server {
         std::string _handleNick(const Request& req, int client_fd);
         std::string _handleUser(const Request& req, int client_fd);
         std::string _handleQuit(const Request& req, int client_fd);
-        std::string _handleOperator(const Request& req, int client_fd);
+        std::string _handleMode(const Request& req, int client_fd);
         std::string	_printMessage(std::string num, std::string nickname, std::string message);
 
     // messages
@@ -69,6 +68,8 @@ class Server {
         std::string _privToUser(std::string User, std::string message, std::string cmd, int i);
         std::string _privToChannel(std::string ChannelName, std::string message, std::string cmd, int i);      
         int         _findFdByNickName(std::string NickName);
+        Client      *getClientByName(const std::string &name) const;
+        Channel     *getChannelByName(const std::string &name) const;
 
     public:
         Server(const std::string &name, int port, const std::string &password);

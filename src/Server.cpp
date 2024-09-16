@@ -185,3 +185,23 @@ void Server::_handleClient(int clientSocket) {
         }
     }
 }
+
+Client *Server::getClientByName(const std::string &name) const {
+    //get the client by name some other way NO ITERATORS
+    for (std::map<int, Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+        if (it->second->getNickname() == name) {
+            return it->second;
+        }
+    }
+    return NULL;
+}
+
+Channel *Server::getChannelByName(const std::string &name) const {
+    //get the channel by name some other way NO ITERATORS
+    for (std::map<std::string, Channel*>::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
+        if (it->first == name) {
+            return it->second;
+        }
+    }
+    return NULL;
+}

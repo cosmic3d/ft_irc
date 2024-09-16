@@ -61,7 +61,7 @@ std::string Server::_handleNick(const Request& req, int client_fd) {
         }
     }
     // Verificar si el nickname es válido (que tampoco contenga ! ni @)
-    if (req.params[0].length() > 9 || !isAlphaNumeric(req.params[0] || req.params[0].find("!") != std::string::npos || req.params[0].find("@") != std::string::npos)) {
+    if (req.params[0].length() > 9 || !isAlphaNumeric(req.params[0]) || req.params[0].find("!") != std::string::npos || req.params[0].find("@") != std::string::npos || req.params[0].find("*") != std::string::npos || req.params[0].find("?") != std::string::npos) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("Erroneous nickname");
@@ -116,34 +116,127 @@ std::string Server::_handleQuit(const Request& req, int client_fd) {
     return "";
 }
 
-std::string	Server::_handleOperator(const Request& req, int client_fd) {
-	if (!this->_clients[client_fd]->getRegistered()) {
+std::string Server::_handleMode(const Request& req, int client_fd)
+{
+    if (req.params.size() < 1) {
         std::vector<std::string> params;
-        params.push_back(this->_clients[client_fd]->getNickname());
-        params.push_back(":You have not registered");
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("Not enough parameters");
         return format_message(_name, ERR_NEEDMOREPARAMS, params);
     }
-	if (req.params.size() < 2) {
+
+    //Encuentra el canal por nombre
+    Channel *channel = _channels.find(req.params[0])->second; //Esto me da miedo
+    if (!channel) {
         std::vector<std::string> params;
-        params.push_back(this->_clients[client_fd]->getNickname());
-        params.push_back("PASS :Not enough parameters");
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("No such channel");
+        return format_message(_name, ERR_NOSUCHCHANNEL, params);
+    }
+    if (req.params.size() < 2) {
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("Not enough parameters");
         return format_message(_name, ERR_NEEDMOREPARAMS, params);
     }
-	if (req.params[0] != "ADMIN") {
+    if (channel->isOperator(client_fd) == false) {
         std::vector<std::string> params;
-        params.push_back(this->_clients[client_fd]->getNickname());
-        params.push_back(":Username/Password incorrect");
-        return format_message(_name, ERR_PASSWDMISMATCH, params);
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("You're not channel operator");
+        return format_message(_name, ERR_CHANOPRIVSNEEDED, params);
     }
-	if (req.params[1] != "1234") {
+    if (req.params[1].length() < 1 || req.params[1].length() > 4) {
         std::vector<std::string> params;
-        params.push_back(this->_clients[client_fd]->getNickname());
-        params.push_back(":Username/Password incorrect");
-        return format_message(_name, ERR_PASSWDMISMATCH, params);
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("Unknown MODE flag");
+        return format_message(_name, ERR_UNKNOWNMODE, params);
     }
-	this->_clients[client_fd]->setIsOperator(true);
-    std::vector<std::string> params;
-    params.push_back(this->_clients[client_fd]->getNickname());
-    params.push_back(":You are now an IRC operator");
-    return format_message(_name, RPL_YOUREOPER, params);
+    char action = req.params[1][0];
+    size_t i_size;
+    if (action == '+' || action == '-')
+        i_size = 1;
+    else
+        i_size = 0;
+
+    for (size_t i = i_size; i < req.params[1].length(); i++) {
+        if (req.params[1][i] == 'o')
+        {
+            if (req.params.size() > 2 && !req.params[2].empty())
+            {
+                Client *client = this->getClientByName(req.params[2]);
+                if (action == '+')
+                {
+                    channel->addOperator(client);
+                    channel->removeMember(client->getClientfd());
+                    std::vector<std::string> params;
+                    params.push_back(req.params[2]);
+                    params.push_back("+o");
+                    return format_message(_name, "MODE", params);
+                }
+                else if (action == '-')
+                {
+                    channel->removeOperator(client->getClientfd());
+                    channel->addMember(client);
+                    std::vector<std::string> params;
+                    params.push_back(req.params[2]);
+                    params.push_back("-o");
+                    return format_message(_name, "MODE", params);
+                }
+            }
+            else
+            {
+                std::vector<std::string> params;
+                params.push_back(_clients[client_fd]->getNickname());
+                params.push_back("Not enough parameters");
+                return format_message(_name, ERR_NEEDMOREPARAMS, params);
+            }
+        }
+        // else if (req.params[1][i] == 'k')
+        // {
+        //     if (req.params.length() > 2 && !req.params[2].empty())
+        //     {
+        //         if (action == '+')
+        //         channel->_key = req.params[2];
+        //         else if (action == '-')
+        //             channel->_key = "";
+        //     }
+        //     else
+        //     {
+        //         //Send the key as a response to the member
+        //         std::vector<std::string> params;
+        //         params.push_back(_clients[client_fd]->getNickname());
+        //         params.push_back(channel->_key);
+        //         return format_message(_name, "MODE", params);
+        //     }
+        // }
+        // else if (req.params[1][i] == 'l' && req.params.length() > 2 && !req.params[2].empty())
+        // {
+        //     if (action == '+')
+        //         channel->_userLimit = std::stoi(req.params[2]);
+        //     else if (action == '-')
+        //         channel->_userLimit = 0;
+        // }
+        // else if (req.params[1][i] == 'b' && req.params.length() > 2 && !req.params[2].empty())
+        // {
+        //     if (action == '+')
+        //         channel->banUser(this->_clients[req.params[2]]);
+        //     else if (action == '-')
+        //         channel->removeBanned(req.params[2]);
+        // }
+        // else if (req.params[1][i] == 'i')
+        // {
+        //     if (action == '+')
+        //         channel->_inviteOnly = true;
+        //     else if (action == '-')
+        //         channel->_inviteOnly = false;
+        // }
+        else
+        {
+            std::vector<std::string> params;
+            params.push_back(_clients[client_fd]->getNickname());
+            params.push_back("Unknown MODE flag");
+            return format_message(_name, ERR_UNKNOWNMODE, params);
+        }
+    }
+    return "";
 }

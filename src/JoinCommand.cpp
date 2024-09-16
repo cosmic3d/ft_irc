@@ -17,7 +17,7 @@ std::string Server::_joinChannel(Request request, int client_fd) {
     
     // IRC Numeric reply codes: https://www.rfc-editor.org/rfc/rfc2812
     // Join command: https://dd.ircdocs.horse/refs/commands/join
-    int j = 1;
+    int j = USERISJOINED;
         
     // Check that there are arguments provided (channel names)
     if (request.params.size() <= 0) {
@@ -27,7 +27,7 @@ std::string Server::_joinChannel(Request request, int client_fd) {
     	return format_message(_name, ERR_NEEDMOREPARAMS, params);
 	}
     if (request.params[0] == "0")
-        return (this->_clients[client_fd]->leaveAllChannels()); // TO-DO
+        return (this->_clients[client_fd]->leaveAllChannels());
 
     // Seperate channel names by comas
     std::vector<std::string> parsChannels(ft_split(request.params[0], ","));
@@ -41,7 +41,7 @@ std::string Server::_joinChannel(Request request, int client_fd) {
     std::vector<std::string>::iterator itKeys = parsKeys.begin();
     
     // Iterate through list of channels to be joined.
-    while (itChannels != parsChannels.end() && j == 1) {
+    while (itChannels != parsChannels.end() && j == USERISJOINED) {
         if (itKeys != parsKeys.end())
             j = _createPrvChannel(*itChannels, *itKeys, client_fd);
         else
@@ -82,6 +82,12 @@ std::string Server::_joinChannel(Request request, int client_fd) {
     		params.push_back(" :No such channel");
 			return format_message(_name, ERR_NOSUCHCHANNEL, params);	
 		}
+		if (j == NOTINVITED) {
+			std::vector<std::string> params;
+				params.push_back(this->_clients[client_fd]->getNickname());
+				params.push_back(" :Cannot join channel (+i)");
+			return format_message(_name, ERR_INVITEONLYCHAN, params);
+		}
         if (itKeys != parsKeys.end())
             itKeys++;
         itChannels++;
@@ -100,7 +106,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		if (ChannelName[0] != '&' && ChannelName[0] != '#' && ChannelName[0] != '+' && ChannelName[0] != '!')
 			return (BADCHANMASK);
 		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]);
-		this->_allChannels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
+		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
 		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
 
 		std::vector<std::string> params;
@@ -116,10 +122,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		if (it->second->getKey().empty())
 		{
 			int i = 0;
-			if (this->_clients[CreatorFd]->getOperator() == true)
-				i = it->second->addOperator(this->_clients[CreatorFd]); // TO-DO
-			else
-				i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
+			i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
 			if (i == USERISJOINED)
 				this->_clients[CreatorFd]->joinChannel( it->first, it->second ); // TO-DO
 			else if (i == USERALREADYJOINED)
@@ -161,7 +164,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 }
 
 int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd) {
-	std::map<std::string, Channel *>::iterator it = this->_allChannels.find(ChannelName);
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
 
     // If channel doesnt exist, create it
     if (it == this->_channels.end())
@@ -169,7 +172,7 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 		if (ChannelName[0] != '&' && ChannelName[0] != '#' && ChannelName[0] != '+' && ChannelName[0] != '!')
 			return (BADCHANMASK);	
 		Channel *channel = new Channel(ChannelName, ChannelKey, this->_clients[CreatorFd]);
-		this->_allChannels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
+		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
 		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
 	}    
     // Else join client to already existing channel checking channelkey
@@ -178,10 +181,7 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 		if (it->second->getKey() == ChannelKey)
 		{
 			int i = 0;
-			if (this->_clients[CreatorFd]->getOperator() == true)
-				i = it->second->addOperator(this->_clients[CreatorFd]); // TO-DO
-			else
-				i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
+			i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
 			if (i == USERISJOINED)
 				this->_clients[CreatorFd]->joinChannel( it->first, it->second ); // TO-DO
 			else if (i == USERALREADYJOINED)
