@@ -86,6 +86,7 @@ class Channel
         void	setKey(std::string key);
         void    setPrefix(char prefix);
         void    setOnlineUsers(int online);
+        void    setInviteOnly(bool inviteOnly);
 
     public:
         bool	isOperator( int i ) const;

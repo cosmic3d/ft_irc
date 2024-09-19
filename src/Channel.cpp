@@ -59,6 +59,7 @@ void	Channel::setOnlineUsers(int online)		{ this->_onlineUsers = online; };
 void	Channel::setName(std::string name)		{ this->_name = name; };
 void	Channel::setKey(std::string key)		{ this->_key = key; };
 void	Channel::setTopic(std::string topic)	{ this->_topic = topic; };
+void	Channel::setInviteOnly(bool inviteOnly) { this->_inviteOnly = inviteOnly; };
 
 bool	Channel::isOperator( int i ) const
 {

@@ -31,11 +31,9 @@ int Server::_sendmsg(int destfd, std::string message) {
 std::string Server::_sendToAllUsers(Channel *channel, int senderFd, std::string message) {
     std::map<int, Client *> allusers = channel->getAllUsers();
     std::map<int, Client *>::iterator it = allusers.begin();
-    std::string reply = this->_clients[senderFd]->mask();
-    reply.append(message);
     while (it != allusers.end()) {
         if (senderFd != it->first) {
-            if (_sendmsg(it->first, reply) == -1) {
+            if (_sendmsg(it->first, message) == -1) {
 				std::cout << "_sendmsg() error: _sendToAllUsers" << std::endl;
 				return ("");
             }
@@ -75,9 +73,10 @@ std::string Server::_privToUser(std::string User, std::string message, std::stri
         params.push_back(User.append(" :No such nick"));
         return format_message(_name, ERR_NOSUCHNICK, params); 
     }
-	std::string reply = this->_clients[i]->mask();
-	reply.append(cmd + " " + User + " :" + message + "\r\n");
-	if (_sendmsg(userFd, reply) == -1)
+    std::vector<std::string> params;
+    params.push_back(this->_clients[userFd]->getNickname());
+    params.push_back(message);
+	if (_sendmsg(userFd, format_message(_clients[i]->mask(), cmd, params)) == -1)
 				std::cout << "_sendmsg() error: _privToUser" << std::endl;
 	return ("");
 };
@@ -90,10 +89,13 @@ std::string 	Server::_privToChannel(std::string ChannelName, std::string message
 		if (this->_clients[i]->isJoined(ChannelName) == 0) {
             std::vector<std::string> params;
             params.push_back(this->_clients[i]->getNickname());
-            params.push_back(ChannelName.append(" :Cannot send to channel"));
+            params.push_back(ChannelName.append("Cannot send to channel"));
             return format_message(_name, ERR_CANNOTSENDTOCHAN, params); 
         }
-		std::string msg(cmd + ChannelName + " :" + message + "\n");
+        std::vector<std::string> params;
+        params.push_back(ChannelName);
+        params.push_back(message);
+		std::string msg(format_message(_clients[i]->mask(), cmd, params));
 		_sendToAllUsers(it->second, i, msg);
 	}
 	else {

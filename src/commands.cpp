@@ -118,7 +118,7 @@ std::string Server::_handleQuit(const Request& req, int client_fd) {
 
 std::string Server::_handleMode(const Request& req, int client_fd)
 {
-    if (req.params.size() < 1) {
+    if (req.params.size() < 2) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("Not enough parameters");
@@ -132,12 +132,6 @@ std::string Server::_handleMode(const Request& req, int client_fd)
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("No such channel");
         return format_message(_name, ERR_NOSUCHCHANNEL, params);
-    }
-    if (req.params.size() < 2) {
-        std::vector<std::string> params;
-        params.push_back(_clients[client_fd]->getNickname());
-        params.push_back("Not enough parameters");
-        return format_message(_name, ERR_NEEDMOREPARAMS, params);
     }
     if (channel->isOperator(client_fd) == false) {
         std::vector<std::string> params;
@@ -223,13 +217,13 @@ std::string Server::_handleMode(const Request& req, int client_fd)
         //     else if (action == '-')
         //         channel->removeBanned(req.params[2]);
         // }
-        // else if (req.params[1][i] == 'i')
-        // {
-        //     if (action == '+')
-        //         channel->_inviteOnly = true;
-        //     else if (action == '-')
-        //         channel->_inviteOnly = false;
-        // }
+        else if (req.params[1][i] == 'i')
+        {
+            if (action == '+')
+                channel->setInviteOnly(true);
+            else if (action == '-')
+                channel->setInviteOnly(false);
+        }
         else
         {
             std::vector<std::string> params;
