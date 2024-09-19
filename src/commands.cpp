@@ -118,7 +118,7 @@ std::string Server::_handleQuit(const Request& req, int client_fd) {
 
 std::string Server::_handleMode(const Request& req, int client_fd)
 {
-    if (req.params.size() < 2) {
+    if (req.params.size() < 1) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("Not enough parameters");
@@ -138,6 +138,12 @@ std::string Server::_handleMode(const Request& req, int client_fd)
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("You're not channel operator");
         return format_message(_name, ERR_CHANOPRIVSNEEDED, params);
+    }
+    if (req.params.size() == 1) {
+        std::vector<std::string> params;
+        std::string modes = channel->getModes();
+        params.push_back(modes.empty() ? "No modes set" : "+" + modes);
+        return format_message(_name, RPL_CHANNELMODEIS, params);
     }
     if (req.params[1].length() < 1 || req.params[1].length() > 4) {
         std::vector<std::string> params;
@@ -163,18 +169,25 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                     channel->addOperator(client);
                     channel->removeMember(client->getClientfd());
                     std::vector<std::string> params;
-                    params.push_back(req.params[2]);
+                    params.push_back(channel->getName());
                     params.push_back("+o");
-                    return format_message(_name, "MODE", params);
+                    params.push_back(client->getNickname());
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                    _sendToAllUsers(channel, client_fd, message);
                 }
                 else if (action == '-')
                 {
                     channel->removeOperator(client->getClientfd());
                     channel->addMember(client);
                     std::vector<std::string> params;
-                    params.push_back(req.params[2]);
+                    params.push_back(channel->getName());
                     params.push_back("-o");
-                    return format_message(_name, "MODE", params);
+                    params.push_back(client->getNickname());
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                    _sendToAllUsers(channel, client_fd, message);
+
                 }
             }
             else
@@ -182,7 +195,8 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                 std::vector<std::string> params;
                 params.push_back(_clients[client_fd]->getNickname());
                 params.push_back("Not enough parameters");
-                return format_message(_name, ERR_NEEDMOREPARAMS, params);
+                std::string message = format_message(_name, ERR_NEEDMOREPARAMS, params);
+                _sendmsg(client_fd, message);
             }
         }
         // else if (req.params[1][i] == 'k')
@@ -219,17 +233,27 @@ std::string Server::_handleMode(const Request& req, int client_fd)
         // }
         else if (req.params[1][i] == 'i')
         {
+            //send confirmstion messages as an echo of the MODE commands
             if (action == '+')
                 channel->setInviteOnly(true);
             else if (action == '-')
                 channel->setInviteOnly(false);
+
+            std::vector<std::string> params;
+            params.push_back(channel->getName());
+            //use ternary operator to determine the action message
+            params.push_back(action == '+' ? "+i" : "-i");
+            std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+            _sendmsg(client_fd, message);
+            _sendToAllUsers(channel, client_fd, message);
         }
         else
         {
             std::vector<std::string> params;
             params.push_back(_clients[client_fd]->getNickname());
             params.push_back("Unknown MODE flag");
-            return format_message(_name, ERR_UNKNOWNMODE, params);
+            std::string message = format_message(_name, ERR_UNKNOWNMODE, params);
+            _sendmsg(client_fd, message);
         }
     }
     return "";

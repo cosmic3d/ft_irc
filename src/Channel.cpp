@@ -53,6 +53,19 @@ std::string						const &Channel::getTopic()			const { return this->_topic; };
 std::map<int, Client *>			const &Channel::getMembers()		const { return this->_members; };
 std::map<int, Client *>			const &Channel::getOperators()		const { return this->_operators; };
 Client*							       Channel::getCreator() 		const { return (this->_creator); };
+std::string								Channel::getModes() const
+{
+	std::string modes;
+	if (this->_inviteOnly)
+		modes.append("i");
+	if (this->_topicRestricted)
+		modes.append("t");
+	if (this->_userLimit > 0)
+		modes.append("l");
+	if (this->_key.length() > 0)
+		modes.append("k");
+	return (modes);
+};
 
 void	Channel::setPrefix(char prefix)			{ this->_prefix = prefix; };
 void	Channel::setOnlineUsers(int online)		{ this->_onlineUsers = online; };

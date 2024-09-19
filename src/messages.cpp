@@ -66,7 +66,7 @@ std::string Server::_privmsg(Request request, int i) {
 };
 
 std::string Server::_privToUser(std::string User, std::string message, std::string cmd, int i) {
-    int userFd = _findFdByNickName(User);
+    int userFd = this->getClientByName(User)->getClientfd();
     if (userFd == USERNOTFOUND) {
         std::vector<std::string> params;
         params.push_back(this->_clients[i]->getNickname());
@@ -105,16 +105,4 @@ std::string 	Server::_privToChannel(std::string ChannelName, std::string message
         return format_message(_name, ERR_NOSUCHNICK, params); 
     }
 	return ("");
-};
-
-int		Server::_findFdByNickName(std::string NickName)
-{
-	std::map<int, Client *>::iterator it = this->_clients.begin();
-	while(it != this->_clients.end())
-	{
-		if (it->second->getNickname() == NickName)
-			return (it->second->getClientfd());
-		it++;
-	}
-	return (USERNOTINCHANNEL);
 };

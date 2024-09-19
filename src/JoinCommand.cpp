@@ -129,6 +129,8 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 				return (USERALREADYJOINED);
 			else if (i == BANNEDFROMCHAN)
 				return (BANNEDFROMCHAN);
+			else if (i == NOTINVITED)
+				return (NOTINVITED);
 			std::vector<std::string> params;
 			params.push_back(ChannelName);
 			_sendToAllUsers(it->second, CreatorFd, format_message(_clients[CreatorFd]->mask(), "JOIN", params));

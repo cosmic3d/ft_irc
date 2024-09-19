@@ -69,6 +69,7 @@ class Channel
         const std::map<int, Client *>   &getOperators() const;
         const std::map<int, Client *>   &getVoice() const;
         Client*                         getCreator() const;
+        std::string				        getModes() const;
         
     public: // modifiers
 		int		addMember( Client *member );
