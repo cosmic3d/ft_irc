@@ -76,9 +76,9 @@ std::string Server::_privToUser(std::string User, std::string message, std::stri
     std::vector<std::string> params;
     params.push_back(this->_clients[userFd]->getNickname());
     params.push_back(message);
-	if (_sendmsg(userFd, format_message(_clients[i]->mask(), cmd, params)) == -1)
-				std::cout << "_sendmsg() error: _privToUser" << std::endl;
-	return ("");
+    std::string finalMessage(format_message(_clients[i]->mask(), cmd, params));
+    _sendmsg(userFd, finalMessage);
+	return "";
 };
 
 std::string 	Server::_privToChannel(std::string ChannelName, std::string message, std::string cmd, int i)
@@ -97,6 +97,7 @@ std::string 	Server::_privToChannel(std::string ChannelName, std::string message
         params.push_back(message);
 		std::string msg(format_message(_clients[i]->mask(), cmd, params));
 		_sendToAllUsers(it->second, i, msg);
+        return "";
 	}
 	else {
         std::vector<std::string> params;

@@ -287,7 +287,7 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
     }
     Channel *channel = channelPair->second;
     std::cout << "Channel: " << channel->listAllUsers() << std::endl;
-    if (channel && channel->isOperator(client_fd) == false)
+    if (channel->isOperator(client_fd) == false)
     {
         print_debug("Client is not channel operator", colors::red, colors::bold);
         if (channel->getInviteOnly())
@@ -306,8 +306,8 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
             params.push_back("You're not on that channel");
             return format_message(_name, ERR_NOTONCHANNEL, params);
         }
-        channel->inviteUser(client);
     }
+    channel->inviteUser(client);
     std::vector<std::string> params;
     params.push_back(req.params[0]);
     params.push_back(req.params[1]);

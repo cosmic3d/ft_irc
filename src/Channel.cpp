@@ -168,7 +168,7 @@ void	Channel::removeMember( int i)
 
 std::string		Channel::listAllUsers() const
 {
-	std::string		AllUsers(":");
+	std::string		AllUsers;
 	std::map<int, Client *>::const_iterator it = this->_operators.begin();
 	while (it != this->_operators.end())
 	{
