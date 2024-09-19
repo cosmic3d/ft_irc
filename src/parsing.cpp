@@ -114,6 +114,12 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         std::cout << "Handling PRIVMSG" << std::endl;
         return (_privmsg(req, client_fd)); // TO_DO
         // TO-DO: Implementar el manejo del comando PRIVMSG
+    // KICK command
+    } else if (req.command == "KICK") {
+        // Handle the KICK command
+        std::cout << "Handling KICK" << std::endl;
+        return (_handleKick(req, client_fd)); // TO_DO
+        // TO-DO: Implement handling of the KICK command
     } else if (req.command == "QUIT") {
         // Manejar el comando QUIT
         std::cout << "Handling QUIT" << std::endl;

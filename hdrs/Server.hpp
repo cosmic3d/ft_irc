@@ -58,6 +58,8 @@ class Server {
         std::string _handleQuit(const Request& req, int client_fd);
         std::string _handleMode(const Request& req, int client_fd);
         std::string _handlePart( Request request, int client_fd );
+        std::string _handleKick( Request request, int client_fd );
+        std::string _kickedFromChannel(std::string ChannelName, std::string message, std::vector<std::string> users, int client_fd);
         int         _partChannel( std::string ChannelName, int i, std::string message, int isPart );
         std::string	_printMessage(std::string num, std::string nickname, std::string message);
 
