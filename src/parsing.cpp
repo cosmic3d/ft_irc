@@ -107,7 +107,7 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     } else if (req.command == "PART") {
         // Manejar el comando PART
         std::cout << "Handling PART" << std::endl;
-        return ""; // TO_DO
+        return (_handlePart(req, client_fd)); // TO_DO
         // TO-DO: Implementar el manejo del comando PART
     } else if (req.command == "PRIVMSG") {
         // Manejar el comando PRIVMSG

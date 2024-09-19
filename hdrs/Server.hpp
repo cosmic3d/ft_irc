@@ -36,12 +36,12 @@ class Channel;
 
 class Server {
     private:
-        std::string             _name; // server name
-        int                     _serverSocket; // fd for listening socket
-        int                     _port; // port number (identifies processes)
-        std::string             _password;
-        std::vector<pollfd>     _pollFds; // monitored by the server for events using poll()
-        std::map<int, Client*>            _clients;
+        std::string                         _name; // server name
+        int                                 _serverSocket; // fd for listening socket
+        int                                 _port; // port number (identifies processes)
+        std::string                         _password;
+        std::vector<pollfd>                 _pollFds; // monitored by the server for events using poll()
+        std::map<int, Client*>              _clients;
         std::map<std::string, Channel *>    _channels;
 
     private:
@@ -57,6 +57,8 @@ class Server {
         std::string _handleUser(const Request& req, int client_fd);
         std::string _handleQuit(const Request& req, int client_fd);
         std::string _handleMode(const Request& req, int client_fd);
+        std::string _handlePart( Request request, int client_fd );
+        int         _partChannel( std::string ChannelName, int i, std::string message, int isPart );
         std::string	_printMessage(std::string num, std::string nickname, std::string message);
 
     // messages
