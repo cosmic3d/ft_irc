@@ -53,6 +53,8 @@ std::string						const &Channel::getTopic()			const { return this->_topic; };
 std::map<int, Client *>			const &Channel::getMembers()		const { return this->_members; };
 std::map<int, Client *>			const &Channel::getOperators()		const { return this->_operators; };
 Client*							       Channel::getCreator() 		const { return (this->_creator); };
+bool												Channel::getTopicRestricted() const { return this->_topicRestricted; };
+bool												Channel::getInviteOnly()	const { return this->_inviteOnly; };
 std::string								Channel::getModes() const
 {
 	std::string modes;
@@ -135,6 +137,14 @@ int	Channel::banUser( Client *member )
 		return (BANNEDFROMCHAN);
 	this->_banList.push_back(member->getNickname());
 	return (USERISBANNED);
+};
+
+int	Channel::inviteUser( Client *member )
+{
+	if (std::find(this->_inviteList.begin(), this->_inviteList.end(), member->getNickname()) != this->_inviteList.end())
+		return (USERISJOINED);
+	this->_inviteList.push_back(member->getNickname());
+	return (USERISJOINED);
 };
 
 void	Channel::removeOperator( int i)

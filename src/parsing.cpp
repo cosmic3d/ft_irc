@@ -109,7 +109,13 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         std::cout << "Handling PART" << std::endl;
         return ""; // TO_DO
         // TO-DO: Implementar el manejo del comando PART
-    } else if (req.command == "PRIVMSG") {
+    }
+    else if (req.command == "INVITE") {
+        // Manejar el comando INVITE
+        std::cout << "Handling INVITE" << std::endl;
+        return _handleInvite(req, client_fd); // TO_DO
+    } 
+    else if (req.command == "PRIVMSG") {
         // Manejar el comando PRIVMSG
         std::cout << "Handling PRIVMSG" << std::endl;
         return (_privmsg(req, client_fd)); // TO_DO
@@ -119,12 +125,8 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         std::cout << "Handling QUIT" << std::endl;
         return ""; // TO_DO
         // TO-DO: Implementar el manejo del comando QUIT
-    } else if (req.command == "WHOIS") {
-        // Manejar el comando WHOIS
-        std::cout << "Handling WHOIS" << std::endl;
-        return ""; // TO_DO
-        // Responder con la información del usuario solicitado
-    } else {
+    }
+    else {
         // Responder con un error al cliente
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
