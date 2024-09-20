@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 20:10:09 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/19 20:33:31 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/20 16:52:52 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,34 +17,51 @@ std::string		Server::_kickedFromChannel(std::string ChannelName, std::string mes
 	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
 	if (it != this->_channels.end())
 	{
-		std::pair<Client *, int> user = it->second->findUserRole(i);
-		if (user.second == 1)
+		if (it->second->isOperator(client_fd) == true)
 		{
 			std::vector<std::string>::iterator user = users.begin();
 			int ret = 0;
 			while (user != users.end())
 			{
 				ret = _findFdByNickName(*user);
-				if (ret == USERNOTINCHANNEL)
-					return (_printMessage("441", this->_clients[i]->getNickName(), (*user).append(" " + ChannelName + " :They aren't on that channel")));
-				std::string reply = "KICK " + ChannelName;
+				if (ret == USERNOTINCHANNEL) {
+					std::vector<std::string> params;
+					params.push_back(this->_clients[client_fd]->getNickname());
+					params.push_back(*user);
+					params.push_back(ChannelName + " :They aren't on that channel");
+					return format_message(_name, ERR_USERNOTINCHANNEL, params);
+				}
+				std::vector<std::string> params;
+				params.push_back(ChannelName);
+				std::string reply = format_message(_clients[client_fd]->mask(), "KICK", params);
 				if (message.empty())
 					reply.append("\n");
 				else
 					reply.append(" " + message + "\n");
-				_sendToAllUsers(it->second, i, reply);
+				_sendToAllUsers(it->second, client_fd, reply);
 				it->second->banUser(this->_clients[ret]);
 				ret = _partChannel(ChannelName, ret, "", 0);
 				user++;
 			}
 		}
-		else if (user.second == -1  /* Not in channel */)
-			return (_printMessage("442", this->_clients[i]->getNickName(), ChannelName + " :You're not on that channel"));
-		else
-			return (_printMessage("482", this->_clients[i]->getNickName(), ChannelName + " :You're not channel operator"));
+		else if (it->second->isOperator(client_fd) == false) {
+			std::vector<std::string> params;
+            params.push_back(this->_clients[client_fd]->getNickname());
+            params.push_back(ChannelName + " :You're not channel operator");
+            return format_message(_name, ERR_CHANOPRIVSNEEDED, params);
+		}
+		else if (it->second->isMember(client_fd) == false) {
+			std::vector<std::string> params;
+			params.push_back(this->_clients[client_fd]->getNickname());
+			params.push_back(ChannelName + " :You're not on that channel");
+			return format_message(_name, ERR_NOTONCHANNEL, params);
+		}
 		return ("");
 	}
-	return (_printMessage("403", this->_clients[i]->getNickName(), ChannelName.append(" :No such channel")));
+	std::vector<std::string> params;
+	params.push_back(this->_clients[client_fd]->getNickname());
+	params.push_back(ChannelName + " :No such channel");
+	return format_message(_name, ERR_NOSUCHCHANNEL, params);
 };
 
 
@@ -62,7 +79,7 @@ std::string Server::_handleKick( Request request, int client_fd ) {
     {
         std::string ret;
         if (request.params.size() == 3)
-            ret = _kickedFromChannel(*it, request.args[2], users, client_fd);
+            ret = _kickedFromChannel(*it, request.params[2], users, client_fd);
         else
             ret = _kickedFromChannel(*it, "", users, client_fd);
         if (!ret.empty())
