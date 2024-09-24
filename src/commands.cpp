@@ -248,6 +248,22 @@ std::string Server::_handleMode(const Request& req, int client_fd)
             _sendmsg(client_fd, message);
             _sendToAllUsers(channel, client_fd, message);
         }
+        else if (req.params[1][i] == 't')
+        {
+            //send confirmstion messages as an echo of the MODE commands
+            if (action == '+')
+                channel->setTopicRestricted(true);
+            else if (action == '-')
+                channel->setTopicRestricted(false);
+
+            std::vector<std::string> params;
+            params.push_back(channel->getName());
+            //use ternary operator to determine the action message
+            params.push_back(action == '+' ? "+t" : "-t");
+            std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+            _sendmsg(client_fd, message);
+            _sendToAllUsers(channel, client_fd, message);
+        }
         else
         {
             std::vector<std::string> params;
@@ -286,7 +302,6 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
         return format_message(_name, ERR_NOSUCHCHANNEL, params);
     }
     Channel *channel = channelPair->second;
-    std::cout << "Channel: " << channel->listAllUsers() << std::endl;
     if (channel->isOperator(client_fd) == false)
     {
         print_debug("Client is not channel operator", colors::red, colors::bold);
@@ -309,12 +324,59 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
     }
     channel->inviteUser(client);
     std::vector<std::string> params;
-    params.push_back(req.params[0]);
-    params.push_back(req.params[1]);
+    params.push_back(req.params[0]); //nickname
+    params.push_back(req.params[1]); //channel
     std::string message = format_message(_clients[client_fd]->mask(), "INVITE", params);
     _sendmsg(client->getClientfd(), message);
     params.clear();
-    params.push_back(req.params[1]);
-    params.push_back(req.params[0]);
+    params.push_back(req.params[1]); //channel
+    params.push_back(req.params[0]); //nickname
     return format_message(_clients[client_fd]->mask(), RPL_INVITING, params);
+}
+
+std::string Server::_handleTopic(const Request& req, int client_fd)
+{
+    if (req.params.size() < 1)
+    {
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("Not enough parameters");
+        return format_message(_name, ERR_NEEDMOREPARAMS, params);
+    }
+    std::map<std::string, Channel *>::iterator channelPair = _channels.find(req.params[0]);
+    if (channelPair == _channels.end())
+    {
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("No such channel");
+        return format_message(_name, ERR_NOSUCHCHANNEL, params);
+    }
+    Channel *channel = channelPair->second;
+    if (req.params.size() == 1)
+    {
+        std::vector<std::string> params;
+        params.push_back(channel->getName());
+        params.push_back(channel->getTopic());
+        if (channel->getTopic().empty())
+            return format_message(_name, RPL_NOTOPIC, params);
+        return format_message(_name, RPL_TOPIC, params);
+    }
+    if (req.params.size() == 2)
+    {
+        if (channel->getTopicRestricted() && channel->isOperator(client_fd) == false)
+        {
+            std::vector<std::string> params;
+            params.push_back(_clients[client_fd]->getNickname());
+            params.push_back("You're not channel operator");
+            return format_message(_name, ERR_CHANOPRIVSNEEDED, params);
+        }
+        channel->setTopic(req.params[1]);
+        std::vector<std::string> params;
+        params.push_back(channel->getName());
+        params.push_back(req.params[1]);
+        std::string message = format_message(_clients[client_fd]->mask(), "TOPIC", params);
+        _sendToAllUsers(channel, client_fd, message);
+        return message;
+    }
+    return "";
 }

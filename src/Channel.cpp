@@ -75,6 +75,7 @@ void	Channel::setName(std::string name)		{ this->_name = name; };
 void	Channel::setKey(std::string key)		{ this->_key = key; };
 void	Channel::setTopic(std::string topic)	{ this->_topic = topic; };
 void	Channel::setInviteOnly(bool inviteOnly) { this->_inviteOnly = inviteOnly; };
+void	Channel::setTopicRestricted(bool topicRestricted) { this->_topicRestricted = topicRestricted; };
 
 bool	Channel::isOperator( int i ) const
 {

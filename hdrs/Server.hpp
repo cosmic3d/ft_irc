@@ -58,6 +58,7 @@ class Server {
         std::string _handleQuit(const Request& req, int client_fd);
         std::string _handleMode(const Request& req, int client_fd);
         std::string _handleInvite(const Request& req, int client_fd);
+        std::string _handleTopic(const Request& req, int client_fd);
         std::string	_printMessage(std::string num, std::string nickname, std::string message);
 
     // messages

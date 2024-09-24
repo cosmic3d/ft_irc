@@ -58,7 +58,7 @@ class Channel
 		Channel &operator=(const Channel& rhs);
 		~Channel();
 
-   	public: /*             Getters                         */
+	 	public: /*             Getters                         */
 		const char                      &getPrefix() const;
 		const int                       &getOnlineUsers() const; 
 		const std::string               &getName() const;
@@ -90,7 +90,8 @@ class Channel
 		void	setKey(std::string key);
 		void    setPrefix(char prefix);
 		void    setOnlineUsers(int online);
-		void    setInviteOnly(bool inviteOnly);
+		void		setInviteOnly(bool inviteOnly);
+		void		setTopicRestricted(bool topicRestricted);
 
 	public:
 		bool	isOperator( int i ) const;
