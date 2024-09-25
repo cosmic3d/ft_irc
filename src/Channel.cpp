@@ -66,6 +66,17 @@ std::string								Channel::getModes() const
 		modes.append("l");
 	if (this->_key.length() > 0)
 		modes.append("k");
+
+	if (this->_userLimit > 0)
+	{
+		modes.append(" ");
+		modes.append(itos(this->_userLimit));
+	}
+	if (this->_key.length() > 0)
+	{
+		modes.append(" ");
+		modes.append(this->_key);
+	}
 	return (modes);
 };
 

@@ -47,7 +47,7 @@ std::string Server::_joinChannel(Request request, int client_fd) {
 				else
 						j = _createChannel(*itChannels, client_fd);
 		if (j == BADCHANMASK) {
-			std::vector<std::string> params;
+				std::vector<std::string> params;
 				params.push_back(this->_clients[client_fd]->getNickname());
 				params.push_back(":Bad Channel Mask");
 				return format_message(_name, ERR_BADCHANNELMASK, params);
@@ -154,6 +154,10 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 			params.push_back("End of NAMES list");
 			_sendmsg(CreatorFd, format_message(_name, RPL_ENDOFNAMES, params));
 			return (USERISJOINED);
+		}
+		else
+		{
+			return (BADCHANNELKEY);
 		}
 	}
 	return (USERISJOINED);

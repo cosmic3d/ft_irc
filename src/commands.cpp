@@ -134,17 +134,28 @@ std::string Server::_handleMode(const Request& req, int client_fd)
         return format_message(_name, ERR_NOSUCHCHANNEL, params);
     }
     Channel *channel = channelPair->second;
+    //check if user is in channel
+    if (!channel->isMember(client_fd) && !channel->isOperator(client_fd)) {
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("You're not on that channel");
+        return format_message(_name, ERR_USERNOTINCHANNEL, params);
+    }
+    if (req.params.size() == 1) {
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back(channel->getName());
+        std::string modes = channel->getModes();
+        params.push_back(modes.empty() ? "No modes set" : "+" + modes);
+        if (!channel->getKey().empty())
+            params.push_back(channel->getKey());
+        return format_message(_name, RPL_CHANNELMODEIS, params);
+    }
     if (channel->isOperator(client_fd) == false) {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
         params.push_back("You're not channel operator");
         return format_message(_name, ERR_CHANOPRIVSNEEDED, params);
-    }
-    if (req.params.size() == 1) {
-        std::vector<std::string> params;
-        std::string modes = channel->getModes();
-        params.push_back(modes.empty() ? "No modes set" : modes);
-        return format_message(_name, RPL_CHANNELMODEIS, params);
     }
     if (req.params[1].length() < 1 || req.params[1].length() > 4) {
         std::vector<std::string> params;
@@ -188,7 +199,6 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                     std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
                     _sendmsg(client_fd, message);
                     _sendToAllUsers(channel, client_fd, message);
-
                 }
             }
             else
@@ -200,38 +210,6 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                 _sendmsg(client_fd, message);
             }
         }
-        // else if (req.params[1][i] == 'k')
-        // {
-        //     if (req.params.length() > 2 && !req.params[2].empty())
-        //     {
-        //         if (action == '+')
-        //         channel->_key = req.params[2];
-        //         else if (action == '-')
-        //             channel->_key = "";
-        //     }
-        //     else
-        //     {
-        //         //Send the key as a response to the member
-        //         std::vector<std::string> params;
-        //         params.push_back(_clients[client_fd]->getNickname());
-        //         params.push_back(channel->_key);
-        //         return format_message(_name, "MODE", params);
-        //     }
-        // }
-        // else if (req.params[1][i] == 'l' && req.params.length() > 2 && !req.params[2].empty())
-        // {
-        //     if (action == '+')
-        //         channel->_userLimit = std::stoi(req.params[2]);
-        //     else if (action == '-')
-        //         channel->_userLimit = 0;
-        // }
-        // else if (req.params[1][i] == 'b' && req.params.length() > 2 && !req.params[2].empty())
-        // {
-        //     if (action == '+')
-        //         channel->banUser(this->_clients[req.params[2]]);
-        //     else if (action == '-')
-        //         channel->removeBanned(req.params[2]);
-        // }
         else if (req.params[1][i] == 'i')
         {
             //send confirmstion messages as an echo of the MODE commands
@@ -290,7 +268,7 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
     {
         std::vector<std::string> params;
         params.push_back(_clients[client_fd]->getNickname());
-        params.push_back("No such nick/channel");
+        params.push_back("No such nick");
         return format_message(_name, ERR_NOSUCHNICK, params);
     }
     std::map<std::string, Channel *>::iterator channelPair = _channels.find(req.params[1]);
@@ -302,12 +280,27 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
         return format_message(_name, ERR_NOSUCHCHANNEL, params);
     }
     Channel *channel = channelPair->second;
+    //check if user is in channel
+    if (!channel->isMember(client_fd) && !channel->isOperator(client_fd)) {
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("You're not on that channel");
+        return format_message(_name, ERR_NOTONCHANNEL, params);
+    }
+    //check if invited user is already in channel
+    if (channel->isMember(client->getClientfd()) || channel->isOperator(client->getClientfd()))
+    {
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back(client->getNickname());
+        params.push_back(channel->getName());
+        params.push_back("User is already in channel");
+        return format_message(_name, ERR_USERONCHANNEL, params);
+    }
     if (channel->isOperator(client_fd) == false)
     {
-        print_debug("Client is not channel operator", colors::red, colors::bold);
         if (channel->getInviteOnly())
         {
-            print_debug("Channel is invite only", colors::red, colors::bold);
             std::vector<std::string> params;
             params.push_back(_clients[client_fd]->getNickname());
             params.push_back("You're not channel operator");
@@ -315,7 +308,6 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
         }
         if (channel->isMember(client_fd) == false)
         {
-            print_debug("Client is not a member of the channel", colors::red, colors::bold);
             std::vector<std::string> params;
             params.push_back(_clients[client_fd]->getNickname());
             params.push_back("You're not on that channel");
@@ -352,6 +344,13 @@ std::string Server::_handleTopic(const Request& req, int client_fd)
         return format_message(_name, ERR_NOSUCHCHANNEL, params);
     }
     Channel *channel = channelPair->second;
+    //check if user is in channel
+    if (!channel->isMember(client_fd) && !channel->isOperator(client_fd)) {
+        std::vector<std::string> params;
+        params.push_back(_clients[client_fd]->getNickname());
+        params.push_back("You're not on that channel");
+        return format_message(_name, ERR_USERNOTINCHANNEL, params);
+    }
     if (req.params.size() == 1)
     {
         std::vector<std::string> params;
