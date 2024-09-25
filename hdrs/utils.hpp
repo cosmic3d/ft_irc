@@ -20,7 +20,9 @@
 
 void print_debug(const std::string &message, std::ostream& (*color)(std::ostream&), std::ostream& (*style)(std::ostream&));
 std::string itos(int n);
+int stoi(const std::string &str);
 std::vector<std::string> ft_split(std::string &str, std::string delim);
 bool isAlphaNumeric(const std::string &str);
+bool isNumeric(const std::string &str);
 
 #endif

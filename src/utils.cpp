@@ -23,6 +23,13 @@ std::string itos(int n) {
 		return stream.str();
 }
 
+int stoi(const std::string &str) {
+        std::istringstream stream(str);
+        int n;
+        stream >> n;
+        return n;
+}
+
 std::vector<std::string> ft_split(std::string &str, std::string delim) {
 		std::vector<std::string> result;
 		size_t pos = 0;
@@ -39,6 +46,15 @@ std::vector<std::string> ft_split(std::string &str, std::string delim) {
 bool isAlphaNumeric(const std::string &str) {
     for (size_t i = 0; i < str.length(); i++) {
         if (!std::isalnum(str[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isNumeric(const std::string &str) {
+    for (size_t i = 0; i < str.length(); i++) {
+        if (!std::isdigit(str[i])) {
             return false;
         }
     }

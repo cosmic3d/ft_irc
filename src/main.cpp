@@ -8,9 +8,7 @@ int main(int argc, char* argv[]) {
     }
 
     //port to num
-    int port;
-    std::stringstream(argv[1]) >> port;
-    std::string password = argv[2];
+    int port(stoi(argv[1]));
 
     try {
         Server ircServer(SERVER_NAME, port, password);

@@ -12,11 +12,11 @@
 
 #include "Channel.hpp"
 
-Channel::Channel(std::string channelName, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _userLimit(0), _name(channelName), _key(), _topic(), _members(), _operators(), _banList(), _inviteList(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
+Channel::Channel(std::string channelName, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _userLimit(0), _name(channelName), _key(), _topic(), _members(), _operators(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
 {
 	this->_operators.insert(std::pair<int, Client *>(Creator->getClientfd(), Creator));
 };
-Channel::Channel(std::string channelName, std::string channelKey, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _userLimit(0), _name(channelName), _key(channelKey), _topic(), _members(), _operators(), _banList(), _inviteList(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
+Channel::Channel(std::string channelName, std::string channelKey, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _userLimit(0), _name(channelName), _key(channelKey), _topic(), _members(), _operators(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
 {
 	this->_operators.insert(std::pair<int, Client *>(Creator->getClientfd(), Creator));
 };
@@ -36,8 +36,6 @@ Channel& Channel::operator=( const Channel& rhs )
 	this->_topic = rhs._topic;
 	this->_members = rhs._members;
 	this->_operators = rhs._operators;
-	this->_banList = rhs._banList;
-	this->_inviteList = rhs._inviteList;
 	this->_banMasks = rhs._banMasks;
 	this->_inviteMasks = rhs._inviteMasks;
 	this->_inviteOnly = rhs._inviteOnly;
@@ -72,11 +70,6 @@ std::string								Channel::getModes() const
 		modes.append(" ");
 		modes.append(itos(this->_userLimit));
 	}
-	if (this->_key.length() > 0)
-	{
-		modes.append(" ");
-		modes.append(this->_key);
-	}
 	return (modes);
 };
 
@@ -104,9 +97,6 @@ bool	Channel::isMember( int i ) const
 
 int	Channel::addMember( Client *member )
 {
-	if (std::find(this->_banList.begin(), this->_banList.end(), member->getNickname()) != this->_banList.end()) //Está banneado explícitamente
-		return (BANNEDFROMCHAN);
-
 	if (this->_banMasks.size() > 0 && matchMaskList(this->_banMasks, member->mask())) { //Está banneado por máscara
 		return (BANNEDFROMCHAN);
 	}
@@ -114,8 +104,7 @@ int	Channel::addMember( Client *member )
 	if (this->_inviteOnly)
 	{
 		if (matchMaskList(this->_inviteMasks, member->mask()) == false) { //No está invitado por máscara
-			if (std::find(this->_inviteList.begin(), this->_inviteList.end(), member->getNickname()) == this->_inviteList.end()) //No está invitado explícitamente
-				return (NOTINVITED);
+			return (NOTINVITED);
 		}
 	}
 
@@ -143,33 +132,10 @@ int	Channel::addOperator( Client *member )
 	return (-1);
 };
 
-int	Channel::banUser( Client *member )
-{
-	if (std::find(this->_banList.begin(), this->_banList.end(), member->getNickname()) != this->_banList.end())
-		return (BANNEDFROMCHAN);
-	this->_banList.push_back(member->getNickname());
-	return (USERISBANNED);
-};
-
-int	Channel::inviteUser( Client *member )
-{
-	if (std::find(this->_inviteList.begin(), this->_inviteList.end(), member->getNickname()) != this->_inviteList.end())
-		return (USERISJOINED);
-	this->_inviteList.push_back(member->getNickname());
-	return (USERISJOINED);
-};
-
 void	Channel::removeOperator( int i)
 {
 	this->_operators.erase(i);
 	this->_onlineUsers--;
-};
-
-void	Channel::removeBanned( std::string NickName )
-{
-	if (std::find(this->_banList.begin(), this->_banList.end(), NickName) != this->_banList.end())
-		return ;
-	this->_banList.erase(std::find(this->_banList.begin(), this->_banList.end(), NickName));
 };
 
 void	Channel::removeMember( int i)

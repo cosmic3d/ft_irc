@@ -169,13 +169,14 @@ std::string Server::_handleMode(const Request& req, int client_fd)
         i_size = 1;
     else
         i_size = 0;
+    size_t arg_count = 2; //index of the first argument. This will be incremented if the mode requires an argument
 
     for (size_t i = i_size; i < req.params[1].length(); i++) {
         if (req.params[1][i] == 'o')
         {
-            if (req.params.size() > 2 && !req.params[2].empty())
+            if (req.params.size() > arg_count && !req.params[arg_count].empty())
             {
-                Client *client = this->getClientByName(req.params[2]);
+                Client *client = this->getClientByName(req.params[arg_count++]);
                 if (action == '+')
                 {
                     channel->addOperator(client);
@@ -208,6 +209,129 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                 params.push_back("Not enough parameters");
                 std::string message = format_message(_name, ERR_NEEDMOREPARAMS, params);
                 _sendmsg(client_fd, message);
+            }
+        }
+        else if (req.params[1][i] == 'b')
+        {
+            if (req.params.size() > arg_count && !req.params[arg_count].empty())
+            {
+                Client *client = this->getClientByName(req.params[arg_count]);
+                if (action == '+')
+                {
+                    channel->_banMasks.push_back(client->mask());
+                    std::vector<std::string> params;
+                    params.push_back(channel->getName());
+                    params.push_back("+b");
+                    params.push_back(client->getNickname());
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                    _sendToAllUsers(channel, client_fd, message);
+                }
+                else if (action == '-')
+                {
+                    channel->removeBanned(client->getNickname());
+                    std::vector<std::string> params;
+                    params.push_back(channel->getName());
+                    params.push_back("-b");
+                    params.push_back(client->getNickname());
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                    _sendToAllUsers(channel, client_fd, message);
+                }
+            }
+            else
+            {
+                std::vector<std::string> params;
+                params.push_back(_clients[client_fd]->getNickname());
+                params.push_back("Not enough parameters");
+                std::string message = format_message(_name, ERR_NEEDMOREPARAMS, params);
+                _sendmsg(client_fd, message);
+            }
+        }
+        else if (req.params[1][i] == 'k')
+        {
+            if (action == '+' || action != '-')
+            {
+                if (req.params.size() > arg_count && !req.params[arg_count].empty())
+                {
+                    channel->setKey(req.params[arg_count]);
+                    std::vector<std::string> params;
+                    params.push_back(channel->getName());
+                    params.push_back("+k");
+                    params.push_back(req.params[arg_count++]);
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                    _sendToAllUsers(channel, client_fd, message);
+                }
+                else
+                {
+                    //Send key value as an echo of the MODE command
+                    std::vector<std::string> params;
+                    params.push_back(channel->getName());
+                    params.push_back("+k");
+                    params.push_back(channel->getKey());
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                }
+            }
+            else if (action == '-')
+            {
+                channel->setKey("");
+                std::vector<std::string> params;
+                params.push_back(channel->getName());
+                params.push_back("-k");
+                std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                _sendmsg(client_fd, message);
+                _sendToAllUsers(channel, client_fd, message);
+            }
+        }
+        else if (req.params[i][i] == 'l')
+        {
+            if (action == '+' || action != '-')
+            {
+                if (req.params.size() > arg_count && !req.params[arg_count].empty())
+                {
+                    //Check before setting the limit if the limit is a valid number
+                    if (isNumeric(req.params[arg_count]))
+                    {
+                        channel->setUserLimit(stoi(req.params[arg_count]));
+                        std::vector<std::string> params;
+                        params.push_back(channel->getName());
+                        params.push_back("+l");
+                        params.push_back(req.params[arg_count++]);
+                        std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                        _sendmsg(client_fd, message);
+                        _sendToAllUsers(channel, client_fd, message);
+                    }
+                    else
+                    {
+                        std::vector<std::string> params;
+                        params.push_back(_clients[client_fd]->getNickname());
+                        params.push_back("Invalid channel limit");
+                        std::string message = format_message(_name, ERR_NEEDMOREPARAMS, params);
+                        _sendmsg(client_fd, message);
+                    }
+                }
+                else
+                {
+                    //Send limit value as an echo of the MODE command
+                    std::vector<std::string> params;
+                    params.push_back(channel->getName());
+                    params.push_back("+l");
+                    params.push_back(std::to_string(channel->getUserLimit()));
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                }
+            }
+            else if (action == '-')
+            {
+                channel->setUserLimit(0);
+                std::vector<std::string> params;
+                params.push_back(channel->getName());
+                params.push_back("-l");
+                std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                _sendmsg(client_fd, message);
+                _sendToAllUsers(channel, client_fd, message);
             }
         }
         else if (req.params[1][i] == 'i')
@@ -314,15 +438,16 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
             return format_message(_name, ERR_NOTONCHANNEL, params);
         }
     }
-    channel->inviteUser(client);
+    channel->_inviteMasks.push_back(client->mask());
     std::vector<std::string> params;
     params.push_back(req.params[0]); //nickname
     params.push_back(req.params[1]); //channel
     std::string message = format_message(_clients[client_fd]->mask(), "INVITE", params);
     _sendmsg(client->getClientfd(), message);
     params.clear();
-    params.push_back(req.params[1]); //channel
+    params.push_back(_clients[client_fd]->getNickname());
     params.push_back(req.params[0]); //nickname
+    params.push_back(req.params[1]); //channel
     return format_message(_clients[client_fd]->mask(), RPL_INVITING, params);
 }
 

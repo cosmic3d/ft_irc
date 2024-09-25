@@ -27,8 +27,7 @@
 #include <cerrno>
 
 #define SERVER_NAME "LittleBigServer"
-#define PORT 8080
-#define MAX_CLIENTS 10
+// #define MAX_CLIENTS 10
 
 class Request;
 class Client;
