@@ -43,8 +43,6 @@ class Channel
 		std::string             _topic;
 		std::map<int, Client *> _members;
 		std::map<int, Client *> _operators;
-		std::vector<std::string>    _banList; //Lista de personas explícitamente baneadas
-		std::vector<std::string>   _inviteList; //Lista de personas explícitamente invitadas
 		std::vector<std::string>   _banMasks; //Lista de máscaras de baneo
 		std::vector<std::string>   _inviteMasks; //Lista de máscaras de invitación
 		bool                        _inviteOnly;
@@ -72,16 +70,16 @@ class Channel
 		bool                      getTopicRestricted() const;
 		bool                      getInviteOnly() const;
 		std::string				        getModes() const;
+		bool											getBanMask(std::string mask) const;
+		bool											getInviteMask(std::string mask) const;
+		int												getUserLimit() const;
 		
 	public: // modifiers
 		int		addMember( Client *member );
 		int		addOperator( Client *member );
 		void	addVoice( Client *member );
-		int		banUser( Client *member );
-		int     inviteUser( Client *member );
 		void	removeOperator( int i );
 		void	removeVoice( int i );
-		void	removeBanned( std::string NickName );
 		void	removeMember( int i );
 	
 	public: /*             Setters                         */
@@ -92,6 +90,11 @@ class Channel
 		void    setOnlineUsers(int online);
 		void		setInviteOnly(bool inviteOnly);
 		void		setTopicRestricted(bool topicRestricted);
+		void		setBanMask(std::string mask);
+		void		setInviteMask(std::string mask);
+		void		removeBanMask(std::string mask);
+		void		removeInviteMask(std::string mask);
+		void		setUserLimit(int limit);
 
 	public:
 		bool	isOperator( int i ) const;

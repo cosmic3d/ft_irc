@@ -12,13 +12,13 @@
 
 #include "Channel.hpp"
 
-Channel::Channel(std::string channelName, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _userLimit(0), _name(channelName), _key(), _topic(), _members(), _operators(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
+Channel::Channel(std::string channelName, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(0), _userLimit(0), _name(channelName), _key(), _topic(), _members(), _operators(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
 {
-	this->_operators.insert(std::pair<int, Client *>(Creator->getClientfd(), Creator));
+	this->addOperator(Creator);
 };
-Channel::Channel(std::string channelName, std::string channelKey, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(1), _userLimit(0), _name(channelName), _key(channelKey), _topic(), _members(), _operators(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
+Channel::Channel(std::string channelName, std::string channelKey, Client *Creator) : _prefix(), _creator(Creator), _onlineUsers(0), _userLimit(0), _name(channelName), _key(channelKey), _topic(), _members(), _operators(), _banMasks(), _inviteMasks(), _inviteOnly(false), _topicRestricted(false)
 {
-	this->_operators.insert(std::pair<int, Client *>(Creator->getClientfd(), Creator));
+	this->addOperator(Creator);
 };
 
 Channel::~Channel() {};
@@ -53,6 +53,9 @@ std::map<int, Client *>			const &Channel::getOperators()		const { return this->_
 Client*							       Channel::getCreator() 		const { return (this->_creator); };
 bool												Channel::getTopicRestricted() const { return this->_topicRestricted; };
 bool												Channel::getInviteOnly()	const { return this->_inviteOnly; };
+bool												Channel::getInviteMask(std::string mask) const { return matchMaskList(this->_inviteMasks, mask); };
+bool												Channel::getBanMask(std::string mask) const { return matchMaskList(this->_banMasks, mask); };
+int													Channel::getUserLimit() const { return this->_userLimit; };
 std::string								Channel::getModes() const
 {
 	std::string modes;
@@ -80,6 +83,41 @@ void	Channel::setKey(std::string key)		{ this->_key = key; };
 void	Channel::setTopic(std::string topic)	{ this->_topic = topic; };
 void	Channel::setInviteOnly(bool inviteOnly) { this->_inviteOnly = inviteOnly; };
 void	Channel::setTopicRestricted(bool topicRestricted) { this->_topicRestricted = topicRestricted; };
+void	Channel::setUserLimit(int limit)		{ this->_userLimit = limit; };
+
+void	Channel::setBanMask(std::string mask){
+	if (mask.empty())
+		return;
+	//If it finds the mask, it doesn't add it
+	if (std::find(this->_banMasks.begin(), this->_banMasks.end(), mask) != this->_banMasks.end())
+		return;
+	this->_banMasks.push_back(mask);
+};
+
+void	Channel::setInviteMask(std::string mask){
+	if (mask.empty())
+		return;
+	//If it finds the mask, it doesn't add it
+	if (std::find(this->_inviteMasks.begin(), this->_inviteMasks.end(), mask) != this->_inviteMasks.end())
+		return;
+	this->_inviteMasks.push_back(mask);
+};
+
+void	Channel::removeBanMask(std::string mask){
+	if (mask.empty())
+		return;
+	std::vector<std::string>::iterator it = std::find(this->_banMasks.begin(), this->_banMasks.end(), mask);
+	if (it != this->_banMasks.end())
+		this->_banMasks.erase(it);
+};
+
+void	Channel::removeInviteMask(std::string mask){
+	if (mask.empty())
+		return;
+	std::vector<std::string>::iterator it = std::find(this->_inviteMasks.begin(), this->_inviteMasks.end(), mask);
+	if (it != this->_inviteMasks.end())
+		this->_inviteMasks.erase(it);
+};
 
 bool	Channel::isOperator( int i ) const
 {
@@ -122,7 +160,7 @@ int	Channel::addMember( Client *member )
 
 int	Channel::addOperator( Client *member )
 {
-	if (!this->isOperator(member->getClientfd()) && this->isMember(member->getClientfd()))
+	if ((!this->isOperator(member->getClientfd()) && this->isMember(member->getClientfd())) || this->_creator->getClientfd() == member->getClientfd())
 	{
 		this->_operators.insert(std::pair<int, Client *>(member->getClientfd(), member));
 		this->_onlineUsers++;

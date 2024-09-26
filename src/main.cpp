@@ -9,6 +9,7 @@ int main(int argc, char* argv[]) {
 
     //port to num
     int port(stoi(argv[1]));
+    std::string password = argv[2];
 
     try {
         Server ircServer(SERVER_NAME, port, password);

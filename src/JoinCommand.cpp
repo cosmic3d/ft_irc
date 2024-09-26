@@ -105,9 +105,8 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		print_debug("Creating channel", colors::blue, colors::on_bright_magenta);
 		if (ChannelName[0] != '&' && ChannelName[0] != '#' && ChannelName[0] != '+' && ChannelName[0] != '!')
 			return (BADCHANMASK);
-		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]);
+		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]); //En el propio constructor se añade como operador al creador por default
 		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
-		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
 
 		std::vector<std::string> params;
 		params.push_back(ChannelName);
@@ -131,6 +130,8 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 				return (BANNEDFROMCHAN);
 			else if (i == NOTINVITED)
 				return (NOTINVITED);
+			else if (i == CHANNELISFULL)
+				return (CHANNELISFULL);
 			std::vector<std::string> params;
 			params.push_back(ChannelName);
 			_sendToAllUsers(it->second, CreatorFd, format_message(_clients[CreatorFd]->mask(), "JOIN", params));
@@ -172,9 +173,8 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 		print_debug("Creating channel", colors::blue, colors::on_bright_magenta);
 		if (ChannelName[0] != '&' && ChannelName[0] != '#' && ChannelName[0] != '+' && ChannelName[0] != '!')
 			return (BADCHANMASK);
-		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]);
+		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]); //En el propio constructor se añade como operador al creador por default
 		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
-		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
 
 		std::vector<std::string> params;
 		params.push_back(ChannelName);
@@ -196,6 +196,10 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 				return (USERALREADYJOINED);
 			else if (i == BANNEDFROMCHAN)
 				return (BANNEDFROMCHAN);
+			else if (i == NOTINVITED)
+				return (NOTINVITED);
+			else if (i == CHANNELISFULL)
+				return (CHANNELISFULL);
 			std::vector<std::string> params;
 			params.push_back(ChannelName);
 			_sendToAllUsers(it->second, CreatorFd, format_message(_clients[CreatorFd]->mask(), "JOIN", params));

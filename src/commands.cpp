@@ -177,7 +177,7 @@ std::string Server::_handleMode(const Request& req, int client_fd)
             if (req.params.size() > arg_count && !req.params[arg_count].empty())
             {
                 Client *client = this->getClientByName(req.params[arg_count++]);
-                if (action == '+')
+                if (action != '-')
                 {
                     channel->addOperator(client);
                     channel->removeMember(client->getClientfd());
@@ -192,7 +192,7 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                 else if (action == '-')
                 {
                     channel->removeOperator(client->getClientfd());
-                    channel->addMember(client);
+                    channel->addMember(client); //PONER FLAG DE SEGUNDO ARGUMENTO PARA AÑADIR SIN COMPROBAR, YA QUE AHORA VOLVERÁ A COMPROBAR SI ESTÁ BANEADO Y ERRONEAMENTE NO LO AÑADIRÁ
                     std::vector<std::string> params;
                     params.push_back(channel->getName());
                     params.push_back("-o");
@@ -215,25 +215,24 @@ std::string Server::_handleMode(const Request& req, int client_fd)
         {
             if (req.params.size() > arg_count && !req.params[arg_count].empty())
             {
-                Client *client = this->getClientByName(req.params[arg_count]);
-                if (action == '+')
+                if (action != '-')
                 {
-                    channel->_banMasks.push_back(client->mask());
+                    channel->setBanMask(req.params[arg_count]);
                     std::vector<std::string> params;
                     params.push_back(channel->getName());
                     params.push_back("+b");
-                    params.push_back(client->getNickname());
+                    params.push_back(req.params[arg_count++]);
                     std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
                     _sendmsg(client_fd, message);
                     _sendToAllUsers(channel, client_fd, message);
                 }
-                else if (action == '-')
+                else
                 {
-                    channel->removeBanned(client->getNickname());
+                    channel->removeBanMask(req.params[arg_count]);
                     std::vector<std::string> params;
                     params.push_back(channel->getName());
                     params.push_back("-b");
-                    params.push_back(client->getNickname());
+                    params.push_back(req.params[arg_count++]);
                     std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
                     _sendmsg(client_fd, message);
                     _sendToAllUsers(channel, client_fd, message);
@@ -250,7 +249,7 @@ std::string Server::_handleMode(const Request& req, int client_fd)
         }
         else if (req.params[1][i] == 'k')
         {
-            if (action == '+' || action != '-')
+            if (action != '-')
             {
                 if (req.params.size() > arg_count && !req.params[arg_count].empty())
                 {
@@ -274,7 +273,7 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                     _sendmsg(client_fd, message);
                 }
             }
-            else if (action == '-')
+            else
             {
                 channel->setKey("");
                 std::vector<std::string> params;
@@ -285,9 +284,9 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                 _sendToAllUsers(channel, client_fd, message);
             }
         }
-        else if (req.params[i][i] == 'l')
+        else if (req.params[1][i] == 'l')
         {
-            if (action == '+' || action != '-')
+            if (action != '-')
             {
                 if (req.params.size() > arg_count && !req.params[arg_count].empty())
                 {
@@ -295,6 +294,9 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                     if (isNumeric(req.params[arg_count]))
                     {
                         channel->setUserLimit(stoi(req.params[arg_count]));
+                        std::cout << "User limit set to: " << channel->getUserLimit() << std::endl;
+                        //print online users
+                        std::cout << "Online users: " << channel->getOnlineUsers() << std::endl;
                         std::vector<std::string> params;
                         params.push_back(channel->getName());
                         params.push_back("+l");
@@ -318,7 +320,7 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                     std::vector<std::string> params;
                     params.push_back(channel->getName());
                     params.push_back("+l");
-                    params.push_back(std::to_string(channel->getUserLimit()));
+                    params.push_back(itos(channel->getUserLimit()));
                     std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
                     _sendmsg(client_fd, message);
                 }
@@ -438,7 +440,7 @@ std::string Server::_handleInvite(const Request& req, int client_fd)
             return format_message(_name, ERR_NOTONCHANNEL, params);
         }
     }
-    channel->_inviteMasks.push_back(client->mask());
+    channel->setInviteMask(client->mask());
     std::vector<std::string> params;
     params.push_back(req.params[0]); //nickname
     params.push_back(req.params[1]); //channel
