@@ -11,9 +11,10 @@
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include "Server.hpp"
 
-Client::Client(): _clientfd(0), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _joinedChannels() {};
-Client::Client( int fd ): _clientfd(fd), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _joinedChannels() {};
+Client::Client(): _clientfd(0), _server() , _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _joinedChannels() {};
+Client::Client( int fd, Server *server ): _clientfd(fd), _server(server), _nickname(), _username(), _hostname(retrieveHostnameIp()), _authenticated(false), _registered(false), _joinedChannels() {};
 Client::Client( const Client& x ) { *this = x; };
 
 
@@ -22,6 +23,7 @@ Client & Client::operator=( const Client& rhs )
 	if (this == &rhs)
 		return (*this);
 	this->_clientfd = rhs._clientfd;
+	this->_server = rhs._server;
 	this->_registered = rhs._registered;
 	this->_nickname = rhs._nickname;
 	this->_username = rhs._username;
@@ -33,8 +35,9 @@ Client & Client::operator=( const Client& rhs )
 
 Client::~Client() {};
 
+Server*		Client::getServer()			const { return (this->_server); };
 std::string	Client::getUsername()		const { return (this->_username); };
-std::string	Client::getNickname()		const { return (this->_nickname.empty() ? "*" : this->_nickname); };
+std::string	Client::getNickname()		const { return (this->_nickname); };
 std::string	Client::getHostname()		const { return  (this->_hostname); };
 bool		Client::getAuth()			const { return (this->_authenticated); };
 int			Client::getClientfd()		const { return (this->_clientfd); };
@@ -106,12 +109,8 @@ std::string	Client::leaveAllChannels()
 	std::map<std::string, Channel *>::iterator it = this->_joinedChannels.begin();
 	while( it != this->_joinedChannels.end())
 	{
-		if (it->second->isOperator(this->getClientfd()))
-			it->second->removeOperator(this->getClientfd());
-		else
-			it->second->removeMember(this->getClientfd());
-		this->leaveChannel(it->first);
-		it = this->_joinedChannels.begin();
+		this->getServer()->_partChannel(it->first, this->_clientfd, "");
+		it++;
 	}
 	return ("");
 };

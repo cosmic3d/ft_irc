@@ -22,6 +22,7 @@ class Client
 {
     private:
         int                 _clientfd;
+        Server*             _server;
         std::string         _nickname;
         std::string         _username;
         std::string         _hostname;
@@ -32,7 +33,7 @@ class Client
 
     public:
         Client();
-        Client(int socket);
+        Client(int socket, Server *server );
         Client(const Client & x);
         ~Client();
         Client &operator=(const Client & rhs);
@@ -41,6 +42,7 @@ class Client
         std::string joinedChannels() const;
         
     public: // Getters
+        Server*                             getServer()			const;
     	std::string							getUsername()		const;
 		std::string							getNickname()		const;
 		std::string                         getHostname()       const;

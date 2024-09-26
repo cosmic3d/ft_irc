@@ -173,7 +173,7 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 		print_debug("Creating channel", colors::blue, colors::on_bright_magenta);
 		if (ChannelName[0] != '&' && ChannelName[0] != '#' && ChannelName[0] != '+' && ChannelName[0] != '!')
 			return (BADCHANMASK);
-		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]); //En el propio constructor se añade como operador al creador por default
+		Channel *channel = new Channel(ChannelName, ChannelKey, this->_clients[CreatorFd]); //En el propio constructor se añade como operador al creador por default
 		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
 		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
 
@@ -187,7 +187,7 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 		// join client to already existing channel
 	else
 	{
-		if (it->second->getKey() == ChannelKey)
+		if (it->second->getKey().empty() || it->second->getKey() == ChannelKey)
 		{
 			int i = 0;
 			i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO

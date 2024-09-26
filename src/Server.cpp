@@ -89,7 +89,7 @@ void    Server::run() {
         for (size_t i = 0; i < _pollFds.size(); ++i) {
             if (_pollFds[i].revents & POLLIN) { // check if there's data to read
                 if (_pollFds[i].fd == _serverSocket) {
-                    _handleConnection(); // TO-DO Handle a new incoming connection
+                    _handleConnection(this); // TO-DO Handle a new incoming connection
                 } else {
                     _handleClient(_pollFds[i].fd); // TO-DO Handle data from existing client
                 }
@@ -98,7 +98,7 @@ void    Server::run() {
     }
 }
 
-void    Server::_handleConnection() {
+void    Server::_handleConnection(Server *server) {
     int clientSocket = accept(_serverSocket, NULL, NULL);
     if (clientSocket < 0) {
         std::cerr<< "Failed to accept client" << std::endl;
@@ -113,11 +113,12 @@ void    Server::_handleConnection() {
 
     // Add new client to client class list (adds to clSo index for constant time access)
     print_debug("New client connected: " + itos(clientSocket), colors::green, colors::bold);
-    _clients[clientSocket] = new Client(clientSocket);
+    _clients[clientSocket] = new Client(clientSocket, server);
 }
 
 void    Server::_handleDisconnection(int clientSocket) {
     print_debug("Client disconnected", colors::red, colors::bold);
+    _clients[clientSocket]->leaveAllChannels();
     // If the client disconnected or an error occurred, close the connection
     close(clientSocket);
     //remove client socket from poll list

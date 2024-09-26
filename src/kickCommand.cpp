@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   kickCommand.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 20:10:09 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/20 16:52:52 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:34:56 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,14 +33,15 @@ std::string		Server::_kickedFromChannel(std::string ChannelName, std::string mes
 				}
 				std::vector<std::string> params;
 				params.push_back(ChannelName);
+				params.push_back(*user);
 				std::string reply = format_message(_clients[client_fd]->mask(), "KICK", params);
-				if (message.empty())
-					reply.append("\n");
-				else
-					reply.append(" " + message + "\n");
+				if (!message.empty())
+					reply.append(" " + message);
 				_sendToAllUsers(it->second, client_fd, reply);
-				it->second->banUser(this->_clients[ret]);
-				ret = _partChannel(ChannelName, ret, "", 0);
+				_sendmsg(client_fd, reply.c_str());
+
+				it->second->setBanMask(getClientByName(*user)->mask());
+				ret = _partChannel(ChannelName, ret, message);
 				user++;
 			}
 		}

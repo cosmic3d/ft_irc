@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/26 15:02:57 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/09/26 16:06:59 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,13 +67,15 @@ std::string Server::_privmsg(Request request, int i) {
 };
 
 std::string Server::_privToUser(std::string User, std::string message, std::string cmd, int i) {
-    int userFd = this->getClientByName(User)->getClientfd();
-    if (userFd == USERNOTFOUND) {
+    Client *client = this->getClientByName(User);
+    if (!client) {
         std::vector<std::string> params;
         params.push_back(this->_clients[i]->getNickname());
-        params.push_back(User.append(" :No such nick"));
+        params.push_back(User);
+        params.push_back("No such nick");
         return format_message(_name, ERR_NOSUCHNICK, params); 
     }
+    int userFd = client->getClientfd();
     std::vector<std::string> params;
     params.push_back(this->_clients[userFd]->getNickname());
     params.push_back(message);
@@ -90,7 +92,8 @@ std::string 	Server::_privToChannel(std::string ChannelName, std::string message
 		if (this->_clients[i]->isJoined(ChannelName) == 0) {
             std::vector<std::string> params;
             params.push_back(this->_clients[i]->getNickname());
-            params.push_back(ChannelName.append("Cannot send to channel"));
+            params.push_back(ChannelName);
+            params.push_back("Cannot send to channel");
             return format_message(_name, ERR_CANNOTSENDTOCHAN, params); 
         }
         std::vector<std::string> params;
@@ -126,10 +129,10 @@ std::string	Server::_notice(Request request, int i) {
     if (request.params.size() < 2) {
         std::vector<std::string> params;
         params.push_back(this->_clients[i]->getNickname());
-        params.push_back("You have not registered");
-        return format_message(_name, ERR_NOTREGISTERED, params);
+        params.push_back("Incorrect number of parameters");
+        return format_message(_name, ERR_NEEDMOREPARAMS, params);
     }
-    // If required param size (2), call _privToUser
+    // If required param size (3), call _privToUser
     if (request.params.size() == 2)
         _privToUser(request.params[0], request.params[1], "NOTICE", i);
     return ("");

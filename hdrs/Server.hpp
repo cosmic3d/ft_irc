@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/26 15:09:16 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/09/26 17:07:02 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ class Server {
         std::string                 _joinChannel(Request request, int client_fd);
         int                         _createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd); // TO-DO
         int                         _createChannel( std::string ChannelName, int CreatorFd ); // TO-DO
-        void    _handleConnection();
+        void    _handleConnection(Server *server);
         void    _handleDisconnection(int clientSocket);
         void    _handleClient(int clientSocket); // TO-DO
         std::string _execute_command(const Request& req, int client_fd);
@@ -58,16 +58,13 @@ class Server {
         std::string _handleMode(const Request& req, int client_fd);
         std::string _handleInvite(const Request& req, int client_fd);
         std::string _handleTopic(const Request& req, int client_fd);
-        std::string _handlePart( Request request, int client_fd );
         std::string _handleKick( Request request, int client_fd );
         std::string _kickedFromChannel(std::string ChannelName, std::string message, std::vector<std::string> users, int client_fd);
-        int         _partChannel( std::string ChannelName, int i, std::string message, int isPart );
         std::string	_printMessage(std::string num, std::string nickname, std::string message);
 
     // messages
     private:
         int		    _sendmsg(int destfd, std::string message);
-        std::string _sendToAllUsers(Channel *channel, int senderFd, std::string message);
 
         std::string	_privmsg(Request request, int i);
         std::string _privToUser(std::string User, std::string message, std::string cmd, int i);
@@ -76,6 +73,8 @@ class Server {
         Channel     *getChannelByName(const std::string &name) const;
         int		    _findFdByNickName(std::string NickName);
         std::string	_notice(Request request, int i);
+        std::string _sendToAllUsers(Channel *channel, int senderFd, std::string message);
+        std::string _handlePart( Request request, int client_fd );
 
     public:
         Server(const std::string &name, int port, const std::string &password);
@@ -91,6 +90,7 @@ class Server {
         void    parseCommand(int clientSocket, const std::string &message);// TO-DO
         std::string execute_command(const Request& req, int client_fd);
         std::string format_message(const std::string& prefix, const std::string& command, const std::vector<std::string>& params);
+        int         _partChannel( std::string ChannelName, int i, std::string message);
 
         //command handlers for IRC commands pending
         
