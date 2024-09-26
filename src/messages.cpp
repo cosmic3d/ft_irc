@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/13 16:26:55 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/26 12:43:02 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,3 +124,17 @@ int		Server::_findFdByNickName(std::string NickName)
 	}
 	return (USERNOTINCHANNEL);
 };
+
+std::string	Server::_notice(Request request, int i) {
+    // Check request params size
+    if (request.params.size() < 2) {
+        std::vector<std::string> params;
+        params.push_back(this->_clients[i]->getNickname());
+        params.push_back("You have not registered");
+        return format_message(_name, ERR_NOTREGISTERED, params);
+    }
+    // If required param size (2), call _privToUser
+    if (request.params.size() == 2)
+        _privToUser(request.params[0], request.params[1], "NOTICE", i);
+    return ("");
+}

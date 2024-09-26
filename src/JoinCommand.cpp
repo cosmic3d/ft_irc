@@ -6,7 +6,7 @@
 /*   By: damendez <damendez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/26 16:20:18 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/13 16:26:55 by damendez         ###   ########.fr       */
+/*   Updated: 2024/09/17 14:18:59 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,10 +116,10 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		if (it->second->getKey().empty())
 		{
 			int i = 0;
-			//if (this->_clients[CreatorFd]->getOperator() == true)
-				//i = it->second->addOperator(this->_clients[CreatorFd]); // TO-DO
-			//else
-			i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
+			if (this->_clients[CreatorFd]->getOperator() == true)
+				i = it->second->addOperator(this->_clients[CreatorFd]); // TO-DO
+			else
+				i = it->second->addMember(this->_clients[CreatorFd]); // TO-DO
 			std::map<int, Client *> allusers = it->second->getAllUsers();
     		std::cout << "Number of users in the channel after adding new member to channel: " << allusers.size() << std::endl;
 			if (i == USERISJOINED)
