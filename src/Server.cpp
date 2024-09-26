@@ -141,7 +141,7 @@ void Server::_handleClient(int clientSocket) {
 
     // Recibir datos del cliente de forma no bloqueante
     std::cout << "Receiving data from client" << std::endl;
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
+    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead == 0) {
         _handleDisconnection(clientSocket);
         return;
