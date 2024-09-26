@@ -167,7 +167,6 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 
 int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd) {
 	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
-	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
 
 		// If channel doesnt exist, create it
 	if (it == this->_channels.end())

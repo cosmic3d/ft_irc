@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/26 14:54:29 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:01:12 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ class Server {
         std::string _privToChannel(std::string ChannelName, std::string message, std::string cmd, int i);      
         Client      *getClientByName(const std::string &name) const;
         Channel     *getChannelByName(const std::string &name) const;
+        int		    _findFdByNickName(std::string NickName);
         std::string	_notice(Request request, int i);
 
     public:

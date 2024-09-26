@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/26 15:00:02 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:02:57 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,6 @@ std::string Server::_privToUser(std::string User, std::string message, std::stri
 
 std::string 	Server::_privToChannel(std::string ChannelName, std::string message, std::string cmd, int i)
 {
-	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
-	if (it != this->_channels.end())
 	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
 	if (it != this->_channels.end())
 	{

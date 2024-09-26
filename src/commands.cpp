@@ -99,7 +99,7 @@ std::string Server::_handleUser(const Request& req, int client_fd) {
         return format_message(_name, ERR_NEEDMOREPARAMS, params);
     }
     // Establecer el username
-    _clients[client_fd]->setUsername(req.params[0]); //RETRIBUIR AQUÍ TAMBIÉN EL MODE
+    _clients[client_fd]->setUsername(req.params[0]);
     // Establecer el hostname y enviar mensaje de bienvenida con formato RPL_WELCOME
     std::vector<std::string> params;
     params.push_back(_clients[client_fd]->getNickname());
