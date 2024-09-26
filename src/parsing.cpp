@@ -107,7 +107,7 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     } else if (req.command == "PART") {
         // Manejar el comando PART
         std::cout << "Handling PART" << std::endl;
-        return ""; // TO_DO
+        return (_handlePart(req, client_fd)); // TO_DO
         // TO-DO: Implementar el manejo del comando PART
     }
     else if (req.command == "INVITE") {
@@ -124,6 +124,12 @@ std::string Server::execute_command(const Request& req, int client_fd) {
         std::cout << "Handling NOTICE" << std::endl;
         return (_notice(req, client_fd)); // TO_DO
         // TO-DO: Implementar el manejo del comando QUIT
+    // KICK command
+    } else if (req.command == "KICK") {
+        // Handle the KICK command
+        std::cout << "Handling KICK" << std::endl;
+        return (_handleKick(req, client_fd)); // TO_DO
+        // TO-DO: Implement handling of the KICK command
     } else if (req.command == "QUIT") {
         // Manejar el comando QUIT
         std::cout << "Handling QUIT" << std::endl;

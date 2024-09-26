@@ -111,7 +111,6 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		//print_debug(channel->getOperators, colors::blue, colors::on_bright_magenta);
 		std::vector<std::string> params;
 		params.push_back(ChannelName);
-		
 		std::string acknoledgement = format_message(_clients[CreatorFd]->mask(), "JOIN", params);
 		_sendToAllUsers(channel, CreatorFd, acknoledgement);
 		_sendmsg(CreatorFd, acknoledgement);

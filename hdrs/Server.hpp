@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/26 15:01:12 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:09:16 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,12 @@ class Channel;
 
 class Server {
     private:
-        std::string             _name; // server name
-        int                     _serverSocket; // fd for listening socket
-        int                     _port; // port number (identifies processes)
-        std::string             _password;
-        std::vector<pollfd>     _pollFds; // monitored by the server for events using poll()
-        std::map<int, Client*>            _clients;
+        std::string                         _name; // server name
+        int                                 _serverSocket; // fd for listening socket
+        int                                 _port; // port number (identifies processes)
+        std::string                         _password;
+        std::vector<pollfd>                 _pollFds; // monitored by the server for events using poll()
+        std::map<int, Client*>              _clients;
         std::map<std::string, Channel *>    _channels;
 
     private:
@@ -58,6 +58,10 @@ class Server {
         std::string _handleMode(const Request& req, int client_fd);
         std::string _handleInvite(const Request& req, int client_fd);
         std::string _handleTopic(const Request& req, int client_fd);
+        std::string _handlePart( Request request, int client_fd );
+        std::string _handleKick( Request request, int client_fd );
+        std::string _kickedFromChannel(std::string ChannelName, std::string message, std::vector<std::string> users, int client_fd);
+        int         _partChannel( std::string ChannelName, int i, std::string message, int isPart );
         std::string	_printMessage(std::string num, std::string nickname, std::string message);
 
     // messages

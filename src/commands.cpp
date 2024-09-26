@@ -13,8 +13,6 @@
 #include "Server.hpp"
 #include "Request.hpp"
 
-
-
 std::string Server::_handlePass(const Request& req, int client_fd) {
     if (req.params.size() < 1) {
         std::vector<std::string> params;

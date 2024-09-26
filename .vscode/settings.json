@@ -1,6 +1,9 @@
 {
     "files.associations": {
+<<<<<<< HEAD
         "ostream": "cpp",
+=======
+>>>>>>> origin/davidPart
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
@@ -55,6 +58,10 @@
         "mutex": "cpp",
         "new": "cpp",
         "numbers": "cpp",
+<<<<<<< HEAD
+=======
+        "ostream": "cpp",
+>>>>>>> origin/davidPart
         "ranges": "cpp",
         "sstream": "cpp",
         "stdexcept": "cpp",
