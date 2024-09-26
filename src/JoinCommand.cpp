@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/26 16:20:18 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/12 18:00:44 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/09/17 14:18:59 by damendez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]); //En el propio constructor se añade como operador al creador por default
 		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
 		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
-
+		//print_debug(channel->getOperators, colors::blue, colors::on_bright_magenta);
 		std::vector<std::string> params;
 		params.push_back(ChannelName);
 		
@@ -166,6 +166,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 }
 
 int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd) {
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
 	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
 
 		// If channel doesnt exist, create it

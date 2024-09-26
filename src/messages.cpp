@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/12 18:33:27 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:00:02 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int Server::_sendmsg(int destfd, std::string message) {
 
     print_debug("SERVER (sending): " + message, colors::cyan, colors::on_bright_grey);
     while (sent < (int)message.length()) {
-        b = send(destfd, message.c_str() + sent, bytesLeft, 0);
+        b = send(destfd, message.c_str() + sent, bytesLeft, MSG_DONTWAIT);
         if (b == -1)
             break;
         sent += b;
@@ -30,6 +30,7 @@ int Server::_sendmsg(int destfd, std::string message) {
 
 std::string Server::_sendToAllUsers(Channel *channel, int senderFd, std::string message) {
     std::map<int, Client *> allusers = channel->getAllUsers();
+    std::cout << "Number of users in the channel: " << allusers.size() << std::endl;
     std::map<int, Client *>::iterator it = allusers.begin();
     while (it != allusers.end()) {
         if (senderFd != it->first) {
@@ -85,6 +86,8 @@ std::string 	Server::_privToChannel(std::string ChannelName, std::string message
 {
 	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
 	if (it != this->_channels.end())
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(ChannelName);
+	if (it != this->_channels.end())
 	{
 		if (this->_clients[i]->isJoined(ChannelName) == 0) {
             std::vector<std::string> params;
@@ -107,3 +110,29 @@ std::string 	Server::_privToChannel(std::string ChannelName, std::string message
     }
 	return ("");
 };
+
+int		Server::_findFdByNickName(std::string NickName)
+{
+	std::map<int, Client *>::iterator it = this->_clients.begin();
+	while(it != this->_clients.end())
+	{
+		if (it->second->getNickname() == NickName)
+			return (it->second->getClientfd());
+		it++;
+	}
+	return (USERNOTINCHANNEL);
+};
+
+std::string	Server::_notice(Request request, int i) {
+    // Check request params size
+    if (request.params.size() < 2) {
+        std::vector<std::string> params;
+        params.push_back(this->_clients[i]->getNickname());
+        params.push_back("You have not registered");
+        return format_message(_name, ERR_NOTREGISTERED, params);
+    }
+    // If required param size (2), call _privToUser
+    if (request.params.size() == 2)
+        _privToUser(request.params[0], request.params[1], "NOTICE", i);
+    return ("");
+}
