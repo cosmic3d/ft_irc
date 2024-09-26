@@ -75,7 +75,7 @@ class Channel
 		int												getUserLimit() const;
 		
 	public: // modifiers
-		int		addMember( Client *member );
+		int		addMember( Client *member, bool checkConditions = true );
 		int		addOperator( Client *member );
 		void	addVoice( Client *member );
 		void	removeOperator( int i );

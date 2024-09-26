@@ -133,28 +133,34 @@ bool	Channel::isMember( int i ) const
 	return (false);
 };
 
-int	Channel::addMember( Client *member )
+int	Channel::addMember( Client *member, bool checkConditions )
 {
-	if (this->_banMasks.size() > 0 && matchMaskList(this->_banMasks, member->mask())) { //Está banneado por máscara
-		return (BANNEDFROMCHAN);
-	}
-
-	if (this->_inviteOnly)
+	if (checkConditions)
 	{
-		if (matchMaskList(this->_inviteMasks, member->mask()) == false) { //No está invitado por máscara
-			return (NOTINVITED);
+		if (this->_banMasks.size() > 0 && matchMaskList(this->_banMasks, member->mask())) { //Está banneado por máscara
+			return (BANNEDFROMCHAN);
 		}
+		if (this->_inviteOnly)
+		{
+			if (matchMaskList(this->_inviteMasks, member->mask()) == false) { //No está invitado por máscara
+				return (NOTINVITED);
+			}
+		}
+		if (this->_userLimit > 0 && this->_onlineUsers >= this->_userLimit) //Está lleno
+			return (CHANNELISFULL);
+		if (this->_members.find(member->getClientfd()) == this->_members.end() && this->_operators.find(member->getClientfd()) == this->_operators.end())
+		{
+			this->_members.insert(std::pair<int, Client *>(member->getClientfd(), member));
+			this->_onlineUsers++;
+			return (USERISJOINED);
+		};
 	}
-
-	if (this->_userLimit > 0 && this->_onlineUsers >= this->_userLimit) //Está lleno
-		return (CHANNELISFULL);
-	
-	if (this->_members.find(member->getClientfd()) == this->_members.end() && this->_operators.find(member->getClientfd()) == this->_operators.end())
+	else
 	{
 		this->_members.insert(std::pair<int, Client *>(member->getClientfd(), member));
 		this->_onlineUsers++;
 		return (USERISJOINED);
-	};
+	}
 	return (-1);
 };
 

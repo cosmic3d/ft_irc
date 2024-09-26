@@ -192,11 +192,47 @@ std::string Server::_handleMode(const Request& req, int client_fd)
                 else if (action == '-')
                 {
                     channel->removeOperator(client->getClientfd());
-                    channel->addMember(client); //PONER FLAG DE SEGUNDO ARGUMENTO PARA AÑADIR SIN COMPROBAR, YA QUE AHORA VOLVERÁ A COMPROBAR SI ESTÁ BANEADO Y ERRONEAMENTE NO LO AÑADIRÁ
+                    channel->addMember(client, false);
                     std::vector<std::string> params;
                     params.push_back(channel->getName());
                     params.push_back("-o");
                     params.push_back(client->getNickname());
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                    _sendToAllUsers(channel, client_fd, message);
+                }
+            }
+            else
+            {
+                std::vector<std::string> params;
+                params.push_back(_clients[client_fd]->getNickname());
+                params.push_back("Not enough parameters");
+                std::string message = format_message(_name, ERR_NEEDMOREPARAMS, params);
+                _sendmsg(client_fd, message);
+            }
+        }
+        else if (req.params[1][i] == 'I')
+        {
+            if (req.params.size() > arg_count && !req.params[arg_count].empty())
+            {
+                if (action != '-')
+                {
+                    channel->setInviteMask(req.params[arg_count]);
+                    std::vector<std::string> params;
+                    params.push_back(channel->getName());
+                    params.push_back("+I");
+                    params.push_back(req.params[arg_count++]);
+                    std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
+                    _sendmsg(client_fd, message);
+                    _sendToAllUsers(channel, client_fd, message);
+                }
+                else
+                {
+                    channel->removeInviteMask(req.params[arg_count]);
+                    std::vector<std::string> params;
+                    params.push_back(channel->getName());
+                    params.push_back("-I");
+                    params.push_back(req.params[arg_count++]);
                     std::string message = format_message(_clients[client_fd]->mask(), "MODE", params);
                     _sendmsg(client_fd, message);
                     _sendToAllUsers(channel, client_fd, message);

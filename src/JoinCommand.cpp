@@ -107,6 +107,7 @@ int	Server::_createChannel( std::string ChannelName, int CreatorFd ) {
 			return (BADCHANMASK);
 		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]); //En el propio constructor se añade como operador al creador por default
 		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
+		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
 
 		std::vector<std::string> params;
 		params.push_back(ChannelName);
@@ -175,6 +176,7 @@ int	Server::_createPrvChannel( std::string ChannelName, std::string ChannelKey, 
 			return (BADCHANMASK);
 		Channel *channel = new Channel(ChannelName, this->_clients[CreatorFd]); //En el propio constructor se añade como operador al creador por default
 		this->_channels.insert(std::pair<std::string, Channel *>(ChannelName, channel));
+		this->_clients[CreatorFd]->joinChannel( ChannelName, channel );
 
 		std::vector<std::string> params;
 		params.push_back(ChannelName);
