@@ -1,6 +1,9 @@
-# FT_IRC Project
+<img src="https://github.com/user-attachments/assets/aefd0832-b75d-4325-b2b0-449c5d3cd19e" alt="drawing" width="600"/>
+
+# FT_IRC
 
 ## Introduction
+
 
 FT_IRC is a simple IRC (Internet Relay Chat) server written in C++. It's a project developed by students of the 42 Barcelona school as part of their curriculum. The goal of this project is to create a functional IRC server that can handle multiple clients, channels, and messages.
 
@@ -28,8 +31,12 @@ Use an IRC client (such as HexChat or mIRC) to connect to the server.
 - The server does **not** support IRCv3 capabilities.
 - The correct way to register after connecting to the server is by using the following sequence of commands:
 ```
-PASS <password> NICK <nickname> USER <username> * 0 :<realname>
+PASS <password>
+NICK <nickname>
+USER <username> * 0 :<realname>
 ```
+**Make sure to replace `<password>` with the server password, `<nickname>` with your unique nickname, `<username>` with your unique username and `<realname>` with your real name**
+- If not using an IRC client, make sure to add the [Carriage Return - Line Feed](https://datatracker.ietf.org/doc/html/rfc2812#section-2.3) character pair after every command
 
 ### 4. YOU CAN PLAY NOW
 Once registered, you can join channels, send messages, and interact with other users
