@@ -1,4 +1,6 @@
-<img src="https://github.com/user-attachments/assets/aefd0832-b75d-4325-b2b0-449c5d3cd19e" alt="drawing" width="600"/>
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/aefd0832-b75d-4325-b2b0-449c5d3cd19e" alt="drawing" width="600"/>
+</div>
 
 # FT_IRC
 
