@@ -95,11 +95,12 @@ std::string Server::execute_command(const Request& req, int client_fd) {
 
     if (req.command == "TOPIC") {
         // Ejemplo de cómo manejar un comando TOPIC
-        std::cout << "Handling to TOPIC" << std::endl;
-        return _handleTopic(req, client_fd); // TO_DO
+        std::cout << "Handling TOPIC" << std::endl;
+        return _handleTopic(req, client_fd);
         // Aquí se respondería con PONG al cliente
     } else if (req.command == "MODE") {
-        return (_handleMode(req, client_fd)); // TO_DO
+        std::cout << "Handling MODE" << std::endl;
+        return (_handleMode(req, client_fd));
     } else if (req.command == "JOIN") {
         // Manejar el comando JOIN
         std::cout << "Handling JOIN" << std::endl;
@@ -107,34 +108,25 @@ std::string Server::execute_command(const Request& req, int client_fd) {
     } else if (req.command == "PART") {
         // Manejar el comando PART
         std::cout << "Handling PART" << std::endl;
-        return (_handlePart(req, client_fd)); // TO_DO
-        // TO-DO: Implementar el manejo del comando PART
+        return (_handlePart(req, client_fd));
     }
     else if (req.command == "INVITE") {
         // Manejar el comando INVITE
         std::cout << "Handling INVITE" << std::endl;
-        return _handleInvite(req, client_fd); // TO_DO
+        return _handleInvite(req, client_fd);
     } 
     else if (req.command == "PRIVMSG") {
         // Manejar el comando PRIVMSG
         std::cout << "Handling PRIVMSG" << std::endl;
-        return (_privmsg(req, client_fd)); // TO_DO
-        // TO-DO: Implementar el manejo del comando PRIVMSG
+        return (_privmsg(req, client_fd));
     } else if (req.command == "NOTICE") {
         std::cout << "Handling NOTICE" << std::endl;
-        return (_notice(req, client_fd)); // TO_DO
-        // TO-DO: Implementar el manejo del comando QUIT
+        return (_notice(req, client_fd));
     // KICK command
     } else if (req.command == "KICK") {
         // Handle the KICK command
         std::cout << "Handling KICK" << std::endl;
-        return (_handleKick(req, client_fd)); // TO_DO
-        // TO-DO: Implement handling of the KICK command
-    } else if (req.command == "QUIT") {
-        // Manejar el comando QUIT
-        std::cout << "Handling QUIT" << std::endl;
-        return ""; // TO_DO
-        // TO-DO: Implementar el manejo del comando QUIT
+        return (_handleKick(req, client_fd));
     }
     else {
         // Responder con un error al cliente

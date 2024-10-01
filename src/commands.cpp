@@ -521,7 +521,7 @@ std::string Server::_handleTopic(const Request& req, int client_fd)
             return format_message(_name, RPL_NOTOPIC, params);
         return format_message(_name, RPL_TOPIC, params);
     }
-    if (req.params.size() == 2)
+    if (req.params.size() >= 2)
     {
         if (channel->getTopicRestricted() && channel->isOperator(client_fd) == false)
         {

@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 14:45:32 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/26 17:07:02 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/10/01 14:14:46 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,10 @@ class Server {
 
     private:
         std::string                 _joinChannel(Request request, int client_fd);
-        int                         _createPrvChannel( std::string ChannelName, std::string ChannelKey, int CreatorFd); // TO-DO
-        int                         _createChannel( std::string ChannelName, int CreatorFd ); // TO-DO
+        int                         _createChannel( std::string ChannelName, int CreatorFd,  std::string ChannelKey = "" );
         void    _handleConnection(Server *server);
         void    _handleDisconnection(int clientSocket);
-        void    _handleClient(int clientSocket); // TO-DO
+        void    _handleClient(int clientSocket);
         std::string _execute_command(const Request& req, int client_fd);
         std::string _handlePass(const Request& req, int client_fd);
         std::string _handleNick(const Request& req, int client_fd);
@@ -85,9 +84,9 @@ class Server {
         void    run();
         
         void    handleConnection();
-        void    handleClient(int clientSocket); // TO-DO
-        void    handleAuthentication(int clientSocket, const std::string &message); // TO-DO
-        void    parseCommand(int clientSocket, const std::string &message);// TO-DO
+        void    handleClient(int clientSocket); 
+        void    handleAuthentication(int clientSocket, const std::string &message); 
+        void    parseCommand(int clientSocket, const std::string &message);
         std::string execute_command(const Request& req, int client_fd);
         std::string format_message(const std::string& prefix, const std::string& command, const std::vector<std::string>& params);
         int         _partChannel( std::string ChannelName, int i, std::string message);

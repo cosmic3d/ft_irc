@@ -89,9 +89,9 @@ void    Server::run() {
         for (size_t i = 0; i < _pollFds.size(); ++i) {
             if (_pollFds[i].revents & POLLIN) { // check if there's data to read
                 if (_pollFds[i].fd == _serverSocket) {
-                    _handleConnection(this); // TO-DO Handle a new incoming connection
+                    _handleConnection(this); // Handle a new incoming connection
                 } else {
-                    _handleClient(_pollFds[i].fd); // TO-DO Handle data from existing client
+                    _handleClient(_pollFds[i].fd); // Handle data from existing client
                 }
             }
         }

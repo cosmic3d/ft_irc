@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:17:59 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/26 19:17:33 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/10/01 15:01:37 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ std::string Server::_privmsg(Request request, int i) {
         params.push_back("Not enough parameters");
         return format_message(_name, ERR_NEEDMOREPARAMS, params); 
     }
-    if (request.params.size() == 2)
+    if (request.params.size() >= 2)
     {
         if (request.params[0].find(",") != std::string::npos) {
             std::vector<std::string> params;
@@ -133,7 +133,7 @@ std::string	Server::_notice(Request request, int i) {
         return format_message(_name, ERR_NEEDMOREPARAMS, params);
     }
     // If required param size (3), call _privToUser
-    if (request.params.size() == 2)
+    if (request.params.size() >= 2)
         _privToUser(request.params[0], request.params[1], "NOTICE", i);
     return ("");
 }
