@@ -55,9 +55,10 @@ Once registered, you can join channels, send messages, and interact with other u
 
 ## Resources
 
-- IRC Protocol Documentation
-- IRC Client Documentation
-- C++ Documentation
+- [Internet Relay Chat: Architecture](https://datatracker.ietf.org/doc/html/rfc2810)
+- [Internet Relay Chat: Client Protocol](https://datatracker.ietf.org/doc/html/rfc2812)
+- [Internet Relay Chat: Channel Management](https://datatracker.ietf.org/doc/html/rfc2811)
+- [Examples of IRC communications](https://chi.cs.uchicago.edu/chirc/irc_examples.html#example-irc-communications)
 
 ## Contributions
 
@@ -87,8 +88,8 @@ The FT_IRC project is licensed under the MIT License.
 
 ## Authors
 
-- Jenavarr
-- Damendez
+- [cosmic3d](https://github.com/cosmic3d)
+- [damendez00](https://github.com/damendez00)
 
 ## Acknowledgments
 
