@@ -6,7 +6,7 @@
 /*   By: jenavarr <jenavarr@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 20:10:09 by damendez          #+#    #+#             */
-/*   Updated: 2024/09/26 15:34:56 by jenavarr         ###   ########.fr       */
+/*   Updated: 2024/10/01 19:36:48 by jenavarr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ std::string Server::_handleKick( Request request, int client_fd ) {
     while (it != channels.end())
     {
         std::string ret;
-        if (request.params.size() == 3)
+        if (request.params.size() >= 3)
             ret = _kickedFromChannel(*it, request.params[2], users, client_fd);
         else
             ret = _kickedFromChannel(*it, "", users, client_fd);

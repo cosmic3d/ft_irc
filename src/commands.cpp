@@ -175,6 +175,13 @@ std::string Server::_handleMode(const Request& req, int client_fd)
             if (req.params.size() > arg_count && !req.params[arg_count].empty())
             {
                 Client *client = this->getClientByName(req.params[arg_count++]);
+                if (!client)
+                {
+                    std::vector<std::string> params;
+                    params.push_back(_clients[client_fd]->getNickname());
+                    params.push_back("No such nick");
+                    return format_message(_name, ERR_NOSUCHNICK, params);
+                }
                 if (action != '-')
                 {
                     channel->addOperator(client);
